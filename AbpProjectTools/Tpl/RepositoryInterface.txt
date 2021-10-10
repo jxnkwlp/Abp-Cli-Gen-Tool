@@ -1,0 +1,11 @@
+﻿using System;
+using System.Linq;
+using Volo.Abp.Domain.Repositories;
+
+namespace {{Namespace}}
+{
+    public interface I{{Name}}Repository : IRepository<{{Name}}, {{Key}}>
+    {
+
+    }
+}
