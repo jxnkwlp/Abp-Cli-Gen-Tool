@@ -9,17 +9,11 @@
         <Version>0.1</Version>
         <Authors>Passingwind</Authors>
         <Copyright>Passingwind</Copyright>
-        <PackageProjectUrl>https://github.com/jxnkwlp/Abp-Cli-Gen-Tool</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/jxnkwlp/Abp-Cli-Gen-Tool</RepositoryUrl>
-        <PackageTags>abp tool</PackageTags>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="NSwag.Core" Version="13.13.2" />
         <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21308.1" />
         <PackageReference Include="ICSharpCode.Decompiler" Version="7.1.0.6543" />
-        <PackageReference Include="Scriban" Version="4.1.0" />
     </ItemGroup>
 
     <ItemGroup>
