@@ -1,9 +1,45 @@
-﻿<ul id='products'>
-  {{ for product in products }}
-    <li>
-      <h2>{{ product.name }}</h2>
-           Price: {{ product.price }}
-           {{ product.description | string.truncate 15 }}
-    </li>
-  {{ end }}
-</ul>
+﻿/**
+* Generate from swagger json url: {{url}}
+**/
+{{ # apis | json }}
+import { request } from 'umi';
+
+{{func renderType
+    if $0 == 1
+        ret "any[]"
+    else if $0 == 2
+        ret "boolean"
+    else if $0 == 4
+        ret "number"
+    else if $0 == 16
+        ret "number"
+    else if $0 == 64
+        ret "string"
+    else
+        ret "any"
+    end
+end}}
+
+{{func out_path_params (params) }}{{ for $item in  params }}{{if for.index != 0}},{{end}}{{ $item.name}} : {{renderType $item.type}}{{end}}{{end}}
+
+{{func out_query_params(params) }}params: { {{ for $item in  params }} {{if for.index != 0 }},{{end}} {{ $item.name}} {{end}} }{{end}}
+
+/**
+* api count: {{apis.size}}
+**/
+
+{{ for api in apis }}
+/**
+* {{ api.summary ?? '*TODO*'}}  {{api.method}} {{api.path}}
+**/
+export async function {{api.operation_id}}(
+    {{out_path_params api.path_params}}{{ api.query_params.size > 0 && api.path_params.size  > 0 ? ',':'' }}{{ if api.query_params.size > 0  }}{{out_query_params api.query_params }}{{end}}
+    {{ api.query_params.size > 0 || api.path_params.size  > 0 ? ',':'' }} options?: { [key: string]: any }
+) {
+  return request<API.IdentityRoleDto>(`{{ api.path | replace "{" "${" }}`, {
+    method: '{{api.method}}',
+    {{ if api.query_params.size > 0 }} params: params, {{end}}
+    ...(options || {}),
+  });
+}
+{{ end }}

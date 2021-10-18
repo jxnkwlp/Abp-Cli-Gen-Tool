@@ -16,10 +16,6 @@ namespace AbpProjectTools
                 Description = "Abp project tools",
             };
 
-            rootCommand.AddGlobalOption(new Option<string>("--slu-dir", "The solution root dir") { IsRequired = true, });
-            rootCommand.AddOption(new Option<bool>("--overwite", () => false));
-            rootCommand.AddOption(new Option<string>("--templates", "The template files directory"));
-
             rootCommand.AddCommand(new CodeGeneratorCommand().GetCommand());
 
             return await rootCommand.InvokeAsync(args);

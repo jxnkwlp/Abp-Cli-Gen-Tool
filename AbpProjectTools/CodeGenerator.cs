@@ -1,7 +1,9 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace AbpProjectTools
 {
+    [Obsolete]
     public static class CodeGenerator
     {
         public static string GenerateDomainService(DomainDefinitions domain)

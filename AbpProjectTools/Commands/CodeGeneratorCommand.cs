@@ -14,11 +14,23 @@ namespace AbpProjectTools
             var command = new Command("generate");
             command.AddAlias("gen");
 
-            command.AddCommand(new GenerateAppServiceCodeCommand().GetCommand());
-            command.AddCommand(new GenerateDomainServiceCodeCommand().GetCommand());
-            command.AddCommand(new GenerateHttpControllerCodeCommand().GetCommand());
-            command.AddCommand(new GenerateRepositoryCodeCommand().GetCommand());
+            var backendCommand = new Command("backend");
 
+            backendCommand.AddGlobalOption(new Option<string>("--slu-dir", "The solution root dir") { IsRequired = true, });
+            backendCommand.AddOption(new Option<bool>("--overwite", () => false));
+            backendCommand.AddOption(new Option<string>("--templates", "The template files directory"));
+
+            backendCommand.AddCommand(new GenerateAppServiceCodeCommand().GetCommand());
+            backendCommand.AddCommand(new GenerateDomainServiceCodeCommand().GetCommand());
+            backendCommand.AddCommand(new GenerateHttpControllerCodeCommand().GetCommand());
+            backendCommand.AddCommand(new GenerateRepositoryCodeCommand().GetCommand());
+
+            command.AddCommand(backendCommand);
+
+            var fontendCommand = new Command("fontend");
+            fontendCommand.AddCommand(new GenerateTypeScriptCodeCommand().GetCommand());
+
+            command.AddCommand(fontendCommand);
 
             return command;
         }
