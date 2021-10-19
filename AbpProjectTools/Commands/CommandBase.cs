@@ -17,9 +17,14 @@ namespace AbpProjectTools.Commands
                 Directory.CreateDirectory(directory);
 
             if (File.Exists(filePath) && overwite == false)
+            {
                 Console.WriteLine($"The file '{filePath}' exists.");
+            }
             else
+            {
                 File.WriteAllText(filePath, content);
+                Console.WriteLine($"Write file '{filePath}' successful.");
+            }
         }
 
         protected static string GetSolutionName(string dir)
@@ -30,6 +35,5 @@ namespace AbpProjectTools.Commands
         }
 
     }
-
 
 }

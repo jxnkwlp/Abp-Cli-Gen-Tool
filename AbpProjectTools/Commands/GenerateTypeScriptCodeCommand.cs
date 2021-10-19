@@ -18,6 +18,9 @@ namespace AbpProjectTools.Commands
             command.AddOption(new Option<string>("--templates", ""));
             command.AddOption(new Option<string>("--project-name", ""));
             command.AddOption(new Option<bool>("--debug", ""));
+            command.AddOption(new Option<bool>("--split-service", () => true));
+            command.AddOption(new Option<bool>("--split-type", ""));
+            command.AddOption(new Option<string[]>("--tags", ""));
 
 
             var helper = new SwaggerHelper();
@@ -25,35 +28,92 @@ namespace AbpProjectTools.Commands
             command.Handler = CommandHandler.Create<GenerateTypeScriptCodeCommandOptions>(async options =>
             {
                 Console.WriteLine($"🚗 Staring generate typescript services and typing file...");
-                Console.WriteLine();
+                Console.WriteLine($"🚗 Loading swagger document api url '{options.SwaggerUrl}'... ");
 
                 var apiInfo = await helper.LoadAsync(options.SwaggerUrl);
 
-                var content1 = TemplateFileHelper.GetFileContent("TypeScriptServices", options.Templates);
-                content1 = TemplateHelper.RenderString(content1, new
-                {
-                    Apis = apiInfo.Apis.ToList(),
-                    Count = apiInfo.Apis.Count,
-                    Url = options.SwaggerUrl,
-                    debug = options.Debug,
-                });
+                Console.WriteLine($"🎉 Loading successful. ");
 
-
-                var content2 = TemplateFileHelper.GetFileContent("TypeScriptTypes", options.Templates);
-                content2 = TemplateHelper.RenderString(content2, new
-                {
-                    schames = apiInfo.Schames.ToList(),
-                    Count = apiInfo.Schames.Count,
-                    Url = options.SwaggerUrl,
-                    debug = options.Debug,
-                });
-
-                var outpath = options.Output;
+                var outputPath = options.Output;
                 if (!string.IsNullOrWhiteSpace(options.ProjectName))
-                    outpath = Path.Combine(options.Output, options.ProjectName);
+                    outputPath = Path.Combine(options.Output, options.ProjectName);
 
-                FileWrite(Path.Combine(outpath, "services.ts"), content1, true);
-                FileWrite(Path.Combine(outpath, "typings.d.ts"), content2, true);
+                if (options.SplitService)
+                {
+                    var templateContent = TemplateFileHelper.GetFileContent("TypeScriptServices", options.Templates);
+
+                    foreach (var item in apiInfo.Apis.GroupBy(x => x.Tags[0]))
+                    {
+                        if (options.Tags?.Any() == true && !options.Tags.Contains(item.Key))
+                        {
+                            continue;
+                        }
+
+                        var name = item.Key;
+                        var apiList = item.ToList();
+
+                        var fileContent = TemplateHelper.RenderString(templateContent, new
+                        {
+                            Name = name,
+                            Apis = apiList,
+                            Count = apiList.Count,
+                            Url = options.SwaggerUrl,
+                            Debug = options.Debug,
+                            ProjectName = options.ProjectName,
+                        });
+
+                        FileWrite(Path.Combine(outputPath, $"{name}.ts"), fileContent, true);
+                    }
+                }
+                else
+                {
+                    var templateContent = TemplateFileHelper.GetFileContent("TypeScriptServices", options.Templates);
+                    var fileContent = TemplateHelper.RenderString(templateContent, new
+                    {
+                        Apis = apiInfo.Apis.ToList(),
+                        Count = apiInfo.Apis.Count,
+                        Url = options.SwaggerUrl,
+                        Debug = options.Debug,
+                        ProjectName = options.ProjectName,
+                    });
+
+                    FileWrite(Path.Combine(outputPath, "services.ts"), fileContent, true);
+                }
+
+
+                if (options.SplitType)
+                {
+                    var templateContent = TemplateFileHelper.GetFileContent("TypeScriptType", options.Templates);
+
+                    foreach (var item in apiInfo.Schames)
+                    {
+                        var name = item.Name;
+
+                        var fileContent = TemplateHelper.RenderString(templateContent, new
+                        {
+                            schame = item,
+                            Url = options.SwaggerUrl,
+                            Debug = options.Debug,
+                            ProjectName = options.ProjectName,
+                        });
+
+                        FileWrite(Path.Combine(outputPath, $"{name}.typings.d.ts"), fileContent, true);
+                    }
+                }
+                else
+                {
+                    var templateContent = TemplateFileHelper.GetFileContent("TypeScriptTypes", options.Templates);
+                    var fileContent = TemplateHelper.RenderString(templateContent, new
+                    {
+                        schames = apiInfo.Schames.ToList(),
+                        Count = apiInfo.Schames.Count,
+                        Url = options.SwaggerUrl,
+                        Debug = options.Debug,
+                        ProjectName = options.ProjectName,
+                    });
+
+                    FileWrite(Path.Combine(outputPath, "typings.d.ts"), fileContent, true);
+                }
 
                 Console.WriteLine("🎉 Done. ");
             });
@@ -69,6 +129,7 @@ namespace AbpProjectTools.Commands
         public string ProjectName { get; set; }
         public string Output { get; set; }
         public string[] IgnoreUrls { get; set; }
+        public string[] Tags { get; set; }
 
         public bool Debug { get; set; }
 

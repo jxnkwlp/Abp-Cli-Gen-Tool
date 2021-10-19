@@ -1,6 +1,5 @@
 ﻿/**
-* Generate from swagger json url: {{url}}
-* Total count: {{schames.size}}
+* Generate from swagger json url: {{url}} 
 **/
 {{ func renderType(type,name)
     if type == 1
@@ -27,12 +26,10 @@ end-}}
 {{end -}}
 
 declare namespace {{project_name ?? "API"}} {
-{{- for type in schames }}
     /**
     *  {{type.description ?? "*TODO*"}}
     **/
     type {{type.name}} = {
         {{- out_path_params type.params -}}
-    }
-{{ end }}
+    } 
 }
