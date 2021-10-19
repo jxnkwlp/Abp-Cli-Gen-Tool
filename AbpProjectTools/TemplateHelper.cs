@@ -1,9 +1,10 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using Scriban;
 using Scriban.Runtime;
+using System;
+using System.IO;
+using System.Linq;
 
 namespace AbpProjectTools
 {
@@ -40,12 +41,28 @@ namespace AbpProjectTools
     {
         public static string Json(object value)
         {
-            return JsonConvert.SerializeObject(value);
+            var settings = new JsonSerializerSettings()
+            {
+                ContractResolver = new CamelCasePropertyNamesContractResolver()
+                {
+                    NamingStrategy = new SnakeCaseNamingStrategy(),
+                },
+            };
+
+            return JsonConvert.SerializeObject(value, settings);
         }
 
         public static string Replace(string source, string match, string replaceTo)
         {
             return source.Replace(match, replaceTo);
+        }
+
+        public static string CamelCase(string source)
+        {
+            if (source == null)
+                return source;
+
+            return source[0].ToString().ToLower() + source.Substring(1);
         }
     }
 }

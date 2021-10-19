@@ -1,16 +1,38 @@
-﻿#
-#
-#
-#
-#
-#
+﻿/**
+* Generate from swagger json url: {{url}}
+* Total count: {{schames.size}}
+**/
+{{ func renderType(type,name)
+    if type == 1
+        ret "string"
+    else if type == 2
+        ret "number"
+    else if type == 3 # datetime
+        ret "Date"
+    else if type == 4
+        ret "boolean"
+    else if type == 5
+        ret  name + "[]"
+    else if type == 6
+        ret name ? name: 'object'
+    else
+        ret "any"
+    end
+end-}}
 
-<ul id='products'>
-  {{ for product in products }}
-    <li>
-      <h2>{{ product.name }}</h2>
-           Price: {{ product.price }}
-           {{ product.description | string.truncate 15 }}
-    </li>
-  {{ end }}
-</ul>
+{{- func out_path_params (params) }}
+        {{for $item in params }}
+            {{- $item.name}}: {{ renderType $item.type $item.type_name }}{{for.last?"":","}} {{-}}
+        {{end -}}
+{{end -}}
+
+declare namespace Api {
+{{- for type in schames }}
+    /**
+    *  {{type.description ?? "*TODO*"}}
+    **/
+    type {{type.name}} = {
+        {{- out_path_params type.params -}}
+    }
+{{ end }}
+}

@@ -4,11 +4,11 @@ namespace AbpProjectTools
 {
     public static class TemplateFileHelper
     {
-        public static string GetFileContent(string name, string directory = null)
+        public static string GetFileContent(string name, string searchDirectory = null)
         {
-            if (!string.IsNullOrEmpty(directory) && Directory.Exists(directory))
+            if (!string.IsNullOrEmpty(searchDirectory) && Directory.Exists(searchDirectory))
             {
-                var filePath = Path.Combine(directory, $"{name}.sbn");
+                var filePath = Path.Combine(searchDirectory, $"{name}.sbn");
                 if (File.Exists(filePath))
                 {
                     return File.ReadAllText(filePath);

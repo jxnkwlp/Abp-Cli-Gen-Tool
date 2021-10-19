@@ -1,18 +1,18 @@
-﻿using System.Collections.Generic;
-using AbpProjectTools.Models;
+﻿using AbpProjectTools.Models;
+using System.Collections.Generic;
 
 namespace AbpProjectTools
 {
     public class SwaggerApiInfoModel
     {
-        public IList<ApiItemDefinition> Apis { get; set; }
+        public IList<ApiDefinition> Apis { get; set; }
 
-        public IList<ApiSchameItemDefinition> ApiSchames { get; set; }
+        public IList<ApiSchameDefinition> Schames { get; set; }
 
         public SwaggerApiInfoModel()
         {
-            Apis = new List<ApiItemDefinition>();
-            ApiSchames = new List<ApiSchameItemDefinition>();
+            Apis = new List<ApiDefinition>();
+            Schames = new List<ApiSchameDefinition>();
         }
     }
 }

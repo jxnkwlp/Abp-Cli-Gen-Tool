@@ -1,44 +1,57 @@
 ﻿/**
 * Generate from swagger json url: {{url}}
+* Total count: {{apis.size}}
 **/
-{{ # apis | json }}
+
 import { request } from 'umi';
 
-{{func renderType
-    if $0 == 1
-        ret "any[]"
-    else if $0 == 2
-        ret "boolean"
-    else if $0 == 4
-        ret "number"
-    else if $0 == 16
-        ret "number"
-    else if $0 == 64
+{{-func renderType(type, name)
+    if type == 1
         ret "string"
+    else if type == 2
+        ret "number"
+    else if type == 3 # datetime
+        ret "Date"
+    else if type == 4
+        ret "boolean"
+    else if type == 5
+        ret  name + "[]"
+    else if type == 6
+        ret name ? name: 'object'
     else
         ret "any"
     end
-end}}
+end-}}
 
-{{func out_path_params (params) }}{{ for $item in  params }}{{if for.index != 0}},{{end}}{{ $item.name}} : {{renderType $item.type}}{{end}}{{end}}
+{{-func out_path_params (params) ~}}
+    {{~ for $item in  params ~}}
+        {{ $item.name | camel_case}}: {{renderType $item.type $item.type_name }} {{~ for.last?"":"," ~}}
+    {{~end~}}
+{{~end~}}
 
-{{func out_query_params(params) }}params: { {{ for $item in  params }} {{if for.index != 0 }},{{end}} {{ $item.name}} {{end}} }{{end}}
+{{-func out_query_params(params) ~}}
+    {{~ for $item in  params}}
+        {{ $item.name | camel_case}}: {{renderType $item.type $item.type_name }} {{~ for.last?"":"," ~}}
+    {{~end~}}
+{{~end~}}
 
+{{- for api in apis }}
 /**
-* api count: {{apis.size}}
-**/
-
-{{ for api in apis }}
-/**
-* {{ api.summary ?? '*TODO*'}}  {{api.method}} {{api.path}}
+*  {{api.summary ?? '*TODO*'}} {{api.method | string.upcase}} {{api.path}}
+*  {{if debug}}{{api|json}}{{end}}
 **/
 export async function {{api.operation_id}}(
-    {{out_path_params api.path_params}}{{ api.query_params.size > 0 && api.path_params.size  > 0 ? ',':'' }}{{ if api.query_params.size > 0  }}{{out_query_params api.query_params }}{{end}}
-    {{ api.query_params.size > 0 || api.path_params.size  > 0 ? ',':'' }} options?: { [key: string]: any }
+    {{ if api.path_params.size > 0 }}{{- out_path_params api.path_params}},{{end}}
+    {{ if api.query_params.size > 0 }}params:{
+        {{- out_query_params api.query_params }}
+    },{{end}}
+    {{ if api.request_param_schame ~}}payload: {{api.request_param_schame}},{{~end}}
+    options?: { [key: string]: any }
 ) {
-  return request<API.IdentityRoleDto>(`{{ api.path | replace "{" "${" }}`, {
-    method: '{{api.method}}',
-    {{ if api.query_params.size > 0 }} params: params, {{end}}
+  return request<{{api.response_param_schame? api.response_param_schame:"any"}}>(`{{ api.path | replace "{" "${" }}`, {
+    method: '{{api.method | string.upcase}}',
+    {{~if api.query_params.size > 0 ~}} params: params, {{~end~}}
+    {{~if api.request_param_schame ~}} data: payload, {{~end~}}
     ...(options || {}),
   });
 }

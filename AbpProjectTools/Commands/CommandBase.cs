@@ -9,15 +9,17 @@ namespace AbpProjectTools.Commands
     {
         public abstract Command GetCommand();
 
-        protected static void FileWrite(string file, string content, bool overwite = false)
+        protected static void FileWrite(string filePath, string content, bool overwite = false)
         {
-            if (!Directory.Exists(Path.GetDirectoryName(file)))
-                Directory.CreateDirectory(Path.GetDirectoryName(file));
+            var directory = Path.GetDirectoryName(filePath);
 
-            if (File.Exists(file) && overwite == false)
-                Console.WriteLine($"The file '{file}' exists.");
+            if (!Directory.Exists(directory))
+                Directory.CreateDirectory(directory);
+
+            if (File.Exists(filePath) && overwite == false)
+                Console.WriteLine($"The file '{filePath}' exists.");
             else
-                File.WriteAllText(file, content);
+                File.WriteAllText(filePath, content);
         }
 
         protected static string GetSolutionName(string dir)

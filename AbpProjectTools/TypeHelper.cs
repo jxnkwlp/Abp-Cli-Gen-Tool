@@ -1,13 +1,13 @@
-﻿using System;
+﻿using ICSharpCode.Decompiler;
+using ICSharpCode.Decompiler.CSharp;
+using ICSharpCode.Decompiler.Metadata;
+using ICSharpCode.Decompiler.TypeSystem;
+using System;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 using System.Text;
-using ICSharpCode.Decompiler;
-using ICSharpCode.Decompiler.CSharp;
-using ICSharpCode.Decompiler.Metadata;
-using ICSharpCode.Decompiler.TypeSystem;
 
 namespace AbpProjectTools
 {

@@ -20,6 +20,7 @@
         <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21308.1" />
         <PackageReference Include="ICSharpCode.Decompiler" Version="7.1.0.6543" />
         <PackageReference Include="Scriban" Version="4.1.0" />
+        <PackageReference Include="NJsonSchema.CodeGeneration.TypeScript" Version="10.5.2" />
     </ItemGroup>
 
     <ItemGroup>

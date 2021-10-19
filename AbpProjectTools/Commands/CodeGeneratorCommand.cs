@@ -1,5 +1,5 @@
-﻿using System.CommandLine;
-using AbpProjectTools.Commands;
+﻿using AbpProjectTools.Commands;
+using System.CommandLine;
 
 namespace AbpProjectTools
 {
