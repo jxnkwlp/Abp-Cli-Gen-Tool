@@ -22,7 +22,7 @@ end-}}
 
 {{- func out_path_params (params) }}
         {{for $item in params }}
-            {{- $item.name}}: {{ renderType $item.type $item.type_name }}{{for.last?"":","}} {{-}}
+            {{- $item.name}}{{$item.required?"":"?"}}: {{ renderType $item.type $item.type_name }}{{$item.required?"":" | undefined"}} {{for.last?"":","}} {{-}}
         {{end -}}
 {{end -}}
 
@@ -31,8 +31,12 @@ declare namespace {{project_name ?? "API"}} {
     /**
     *  {{type.description ?? "*TODO*"}}
     **/
+    {{~if type.enumerable~}}
+    type {{type.name}} = {{for $v in type.enum_values }} {{$v}} {{for.last?" ; ":"|"}}{{end}}
+    {{~else~}}
     type {{type.name}} = {
         {{- out_path_params type.params -}}
     }
+    {{~end~}}
 {{ end }}
 }

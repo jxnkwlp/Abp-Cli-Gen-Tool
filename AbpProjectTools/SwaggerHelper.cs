@@ -1,9 +1,9 @@
-﻿using AbpProjectTools.Models;
-using NJsonSchema;
-using NSwag;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AbpProjectTools.Models;
+using NJsonSchema;
+using NSwag;
 
 namespace AbpProjectTools
 {
@@ -32,12 +32,26 @@ namespace AbpProjectTools
                     .Operation
                     .ActualParameters
                     .Where(x => x.Kind == OpenApiParameterKind.Path)
-                    .Select(x => new ApiParamItem { Name = x.Name, Type = GetItemType(x.Schema.Type), Description = x.Description, IsRequired = true });
+                    .Select(x => new ApiParamItem
+                    {
+                        Name = x.Name,
+                        Type = GetItemType(x.Schema.Type),
+                        Description = x.Description,
+                        Required = x.IsRequired,
+                        Nullable = !x.IsRequired, 
+                    });
                 var queryParams = item
                     .Operation
                     .ActualParameters
                     .Where(x => x.Kind == OpenApiParameterKind.Query)
-                    .Select(x => new ApiParamItem { Name = x.Name, Type = GetItemType(x.Schema.Type), Description = x.Description, IsRequired = x.IsRequired, IsNullable = !x.IsRequired });
+                    .Select(x => new ApiParamItem
+                    {
+                        Name = x.Name,
+                        Type = GetItemType(x.Schema.Type),
+                        Description = x.Description,
+                        Required = x.IsRequired,
+                        Nullable = !x.IsRequired,
+                    });
 
                 var apiItem = new ApiDefinition()
                 {
@@ -98,58 +112,67 @@ namespace AbpProjectTools
             foreach (var item in document.Definitions)
             {
                 var typeName = item.Value.Title;
-
                 var props = new List<ApiParamItem>();
 
-                foreach (var prop in item.Value.ActualProperties)
-                {
-                    var p = new ApiParamItem()
-                    {
-                        Name = prop.Key,
-                        Type = GetItemType(prop.Value.Type),
-                        // TypeName = prop.Value.HasReference ? prop.Value.Reference.Title : (prop.Value.Type == JsonObjectType.Array ? GetItemType(prop.Value.Item.Type).ToString() : null),
-                        Description = prop.Value.Description,
-                        IsRequired = prop.Value.IsRequired,
-                    };
-
-                    if (prop.Value.HasReference)
-                    {
-                        p.Type = ApiParamType.Object;
-                        p.TypeName = prop.Value.Reference.Title;
-                    }
-                    else
-                    {
-                        if (p.Type == ApiParamType.Array)
-                        {
-                            var arrayItem = prop.Value.Item;
-                            if (arrayItem.HasReference)
-                            {
-                                p.TypeName = arrayItem.Reference.Title;
-                            }
-                            else if (arrayItem.Type == JsonObjectType.None)
-                            {
-                                p.TypeName = arrayItem.Title;
-                            }
-                            else
-                            {
-                                var arrayItemType = GetItemType(arrayItem.Type);
-                                p.TypeName = arrayItemType.ToString().ToLowerInvariant();
-                            }
-                        }
-                        else
-                        {
-                            p.TypeName = p.Type.ToString().ToLowerInvariant();
-                        }
-                    }
-
-                    props.Add(p);
-                }
-
-                result.Schames.Add(new ApiSchameDefinition()
+                var s = new ApiSchameDefinition()
                 {
                     Name = typeName,
                     Params = props,
-                });
+                };
+
+                if (item.Value.IsEnumeration)
+                {
+                    s.Enumerable = true;
+                    s.EnumValues = item.Value.Enumeration?.ToList();
+                }
+                else
+                {
+                    foreach (var prop in item.Value.ActualProperties)
+                    {
+                        var p = new ApiParamItem()
+                        {
+                            Name = prop.Key,
+                            Type = GetItemType(prop.Value.Type),
+                            // TypeName = prop.Value.HasReference ? prop.Value.Reference.Title : (prop.Value.Type == JsonObjectType.Array ? GetItemType(prop.Value.Item.Type).ToString() : null),
+                            Description = prop.Value.Description,
+                            Required = prop.Value.IsRequired,
+                        };
+
+                        if (prop.Value.HasReference)
+                        {
+                            p.Type = ApiParamType.Object;
+                            p.TypeName = prop.Value.Reference.Title;
+                        }
+                        else
+                        {
+                            if (p.Type == ApiParamType.Array)
+                            {
+                                var arrayItem = prop.Value.Item;
+                                if (arrayItem.HasReference)
+                                {
+                                    p.TypeName = arrayItem.Reference.Title;
+                                }
+                                else if (arrayItem.Type == JsonObjectType.None)
+                                {
+                                    p.TypeName = arrayItem.Title;
+                                }
+                                else
+                                {
+                                    var arrayItemType = GetItemType(arrayItem.Type);
+                                    p.TypeName = arrayItemType.ToString().ToLowerInvariant();
+                                }
+                            }
+                            else
+                            {
+                                p.TypeName = p.Type.ToString().ToLowerInvariant();
+                            }
+                        }
+
+                        props.Add(p);
+                    }
+                }
+
+                result.Schames.Add(s);
             }
 
             return result;

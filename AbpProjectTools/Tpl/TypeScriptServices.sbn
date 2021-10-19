@@ -31,7 +31,7 @@ end-}}
 
 {{-func out_query_params(params) ~}}
     {{~ for $item in  params}}
-        {{ $item.name | camel_case}}: {{renderType $item.type $item.type_name }} {{~ for.last?"":"," ~}}
+        {{ $item.name | camel_case}}{{$item.required?"":"?"}}: {{renderType $item.type $item.type_name }}{{$item.required?"":" | undefined"}} {{~ for.last?"":"," ~}}
     {{~end~}}
 {{~end~}}
 
@@ -41,7 +41,7 @@ end-}}
 *  {{api.summary ?? '*TODO*'}} {{api.method | string.upcase}} {{api.path}}
 *  {{if debug}}{{api|json}}{{end}}
 **/
-export async function {{api.operation_id}}(
+export async function {{api.operation_id | camel_case }}(
     {{- if api.path_params.size > 0 }}{{- out_path_params api.path_params}},{{end}}
     {{- if api.query_params.size > 0 }}params:{
         {{- out_query_params api.query_params }}
@@ -53,7 +53,8 @@ export async function {{api.operation_id}}(
     method: '{{api.method | string.upcase}}',
     {{~if api.query_params.size > 0 ~}} params: params, {{~end~}}
     {{~if api.request_param_schame ~}} data: payload, {{~end~}}
+    {{~if !api.response_param_schame ~}} getResponse: true, {{~end~}}
     ...(options || {}),
   });
-} 
+}
 {{- end -}}
