@@ -1,0 +1,20 @@
+﻿using System;
+using System.Threading.Tasks;
+using Volo.Abp.Application.Services;
+using Volo.Abp.Domain.Repositories;
+
+namespace {{domain.type_namespace}}
+{
+    {{~if basic_service~}}
+    public class {{domain.type_name}}AppService : IApplicationService, I{{domain.type_name}}AppService
+    {{~else~}}
+    public class {{domain.type_name}}AppService : CrudAppService<{{domain.type_name}}, {{domain.type_name}}Dto, {{domain.type_key}}, {{list_request_type_name}}, {{create_type_name}}, {{update_type_name}}>, I{{domain.type_name}}AppService
+    {{~end~}}
+    {
+        {{~if !basic_service~}}
+        public {{domain.type_name}}AppService(IRepository<{{domain.type_name}}, {{domain.type_key}}> repository) : base(repository)
+        {
+        }
+        {{~end~}}
+    }
+}

@@ -1,7 +1,6 @@
-﻿using AbpProjectTools.Commands;
-using System.CommandLine;
+﻿using System.CommandLine;
 
-namespace AbpProjectTools
+namespace AbpProjectTools.Commands
 {
     public class CodeGeneratorCommand : CommandBase
     {
@@ -17,13 +16,14 @@ namespace AbpProjectTools
             var backendCommand = new Command("backend");
 
             backendCommand.AddGlobalOption(new Option<string>("--slu-dir", "The solution root dir") { IsRequired = true, });
-            backendCommand.AddOption(new Option<bool>("--overwite", () => false));
-            backendCommand.AddOption(new Option<string>("--templates", "The template files directory"));
+            backendCommand.AddGlobalOption(new Option<string>("--name", "The Domain entity name") { IsRequired = true, });
+            backendCommand.AddGlobalOption(new Option<bool>("--overwrite", () => false));
+            backendCommand.AddGlobalOption(new Option<string>("--templates", "The template files directory"));
 
-            backendCommand.AddCommand(new GenerateAppServiceCodeCommand().GetCommand());
             backendCommand.AddCommand(new GenerateDomainServiceCodeCommand().GetCommand());
-            backendCommand.AddCommand(new GenerateHttpControllerCodeCommand().GetCommand());
             backendCommand.AddCommand(new GenerateRepositoryCodeCommand().GetCommand());
+            backendCommand.AddCommand(new GenerateAppServiceCodeCommand().GetCommand());
+            backendCommand.AddCommand(new GenerateHttpControllerCodeCommand().GetCommand());
 
             command.AddCommand(backendCommand);
 
@@ -37,27 +37,24 @@ namespace AbpProjectTools
 
     }
 
-    public class CodeGeneratorCommandOption
+    public class BackendCodeGeneratorCommonCommandOption
     {
-        public string Name { get; set; }
         public string SluDir { get; set; }
-        public bool Overwite { get; set; }
+        public string Name { get; set; }
+        public bool Overwrite { get; set; }
+        public string Template { get; set; }
     }
 
-    public class GenerateRepositoryCommandOption : CodeGeneratorCommandOption
-    {
-    }
-
-    public class GenerateAppServiceCommandOption : CodeGeneratorCommandOption
+    public class GenerateAppServiceCommandOption : BackendCodeGeneratorCommonCommandOption
     {
         public string ListRequestTypeName { get; set; }
         public string CreateTypeName { get; set; }
         public string UpdateTypeName { get; set; }
-        public bool CreateSameAsUpdate { get; set; }
+        public bool Split { get; set; }
 
         /// <summary>
         ///  custom app service 
         /// </summary>
-        public bool Custom { get; set; }
+        public bool BasicService { get; set; }
     }
 }

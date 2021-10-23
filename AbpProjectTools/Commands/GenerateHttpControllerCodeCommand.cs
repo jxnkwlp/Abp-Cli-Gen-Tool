@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Drawing;
 using System.IO;
+using Pastel;
 
 namespace AbpProjectTools.Commands
 {
@@ -11,53 +14,78 @@ namespace AbpProjectTools.Commands
         {
             var command = new Command("http-controller");
 
-            command.AddOption(new Option<string>("--name", "The Domain entity name") { IsRequired = true, });
-
-            command.Handler = CommandHandler.Create<GenerateRepositoryCommandOption>(options =>
+            command.Handler = CommandHandler.Create<BackendCodeGeneratorCommonCommandOption>(options =>
             {
+                var typeService = new TypeService(options.SluDir);
+
+                var templateService = new TemplateService(options.Template);
+
+                var controllerProject = FileHelper.GetHttpControllerProjectDirectory(options.SluDir);
+
                 try
                 {
-                    Console.WriteLine($"😁 Staring generate domain '{options.Name}' service...");
-                    Console.WriteLine();
+                    Console.WriteLine($"🚗 Staring generate domain '{options.Name}' app-service for http api code ...");
 
-                    var domainFile = FileHelper.FindFile(options.SluDir, options.Name);
+                    var domainInfo = typeService.GetDomain(options.Name);
+                    var appServiceInfo = typeService.GetAppServiceContract(options.Name);
 
-                    var webProjectPath = FileHelper.GetWebProjectDirectory(options.SluDir);
-                    var domainProjectPath = FileHelper.GetDomainProjectDirectory(options.SluDir);
-                    var appContractProjectPath = FileHelper.GetApplicationContractProjectDirectory(options.SluDir);
-                    var httpApiProjectPath = FileHelper.GetHttpControllerProjectDirectory(options.SluDir);
+                    var fileContent = templateService.Render("HttpApiController", new
+                    {
+                        domain = domainInfo,
+                        appServices = appServiceInfo.Methods,
+                        routes = GenerateRoute(appServiceInfo.Methods),
+                    });
 
-                    Console.WriteLine($"Domain project path: {domainProjectPath.FullName}");
-                    Console.WriteLine($"Httpapi project path: {httpApiProjectPath.FullName}");
-                    Console.WriteLine();
+                    var filePath = Path.Combine(controllerProject.FullName, domainInfo.FileProjectPath, $"{domainInfo.TypeName}Controller.cs");
 
-                    var domain = TypeHelper.GetDomain(domainProjectPath, options.Name);
-                    domain.FileDirectory = domainFile.DirectoryName.Substring(domainProjectPath.FullName.Length + 1);
-                    domain.FileFullName = domainFile.FullName;
-                    domain.ProjectName = GetSolutionName(options.SluDir);
-
-                    Console.WriteLine($"Domain find in '{domain.FileDirectory}', type: '{domain.TypeFullName}' ");
-                    Console.WriteLine();
-
-                    // write file 
-                    // var body = TypeHelper.GenerateHttpApiController(appContractProjectPath, webProjectPath.FullName, domain.TypeName);
-                    var code = CodeGenerator.GenerateHttpApiController(domain, null);
-                    var file = Path.Combine(httpApiProjectPath.FullName, domain.FileDirectory, $"{domain.TypeName}Controller.cs");
-
-                    FileWrite(file, code, options.Overwite);
-                    Console.WriteLine($"Write file '{file}'. ");
-
+                    WriteFileContent(filePath, fileContent, options.Overwrite);
 
                     Console.WriteLine("🎉 Done. ");
-
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Console.WriteLine(ex.Message.Pastel(Color.Red));
+                    Console.WriteLine(ex.ToString().Pastel(Color.Red));
                 }
+
             });
 
             return command;
+        }
+
+        private static Dictionary<string, AppServiceRouteInfo> GenerateRoute(IEnumerable<TypeMethodInfo> methods)
+        {
+            var result = new Dictionary<string, AppServiceRouteInfo>();
+
+            foreach (var item in methods)
+            {
+                if (item.Name == "CreateAsync")
+                {
+                    result[item.Name] = new AppServiceRouteInfo("HttpPost");
+                }
+                else if (item.Name == "UpdateAsync")
+                {
+                    result[item.Name] = new AppServiceRouteInfo("HttpPut", "{id}");
+                }
+                else if (item.Name == "DeleteAsync")
+                {
+                    result[item.Name] = new AppServiceRouteInfo("HttpDelete", "{id}");
+                }
+                else if (item.Name == "GetAsync")
+                {
+                    result[item.Name] = new AppServiceRouteInfo("HttpGet", "{id}");
+                }
+                else if (item.Name == "GetListAsync")
+                {
+                    result[item.Name] = new AppServiceRouteInfo("HttpGet");
+                }
+                else
+                {
+                    result[item.Name] = new AppServiceRouteInfo("HttpPost", item.Name.Replace("Async", "").ToLower());
+                }
+            }
+
+            return result;
         }
     }
 }

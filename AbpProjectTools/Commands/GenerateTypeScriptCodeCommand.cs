@@ -3,6 +3,7 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Linq;
+using AbpProjectTools.Services;
 
 namespace AbpProjectTools.Commands
 {
@@ -23,10 +24,12 @@ namespace AbpProjectTools.Commands
             command.AddOption(new Option<string[]>("--tags", ""));
 
 
-            var helper = new SwaggerHelper();
+            var helper = new SwaggerService();
 
             command.Handler = CommandHandler.Create<GenerateTypeScriptCodeCommandOptions>(async options =>
             {
+                var templateService = new TemplateService(options.Templates);
+
                 Console.WriteLine($"🚗 Staring generate typescript services and typing file...");
                 Console.WriteLine($"🚗 Loading swagger document api url '{options.SwaggerUrl}'... ");
 
@@ -40,8 +43,6 @@ namespace AbpProjectTools.Commands
 
                 if (options.SplitService)
                 {
-                    var templateContent = TemplateFileHelper.GetFileContent("TypeScriptServices", options.Templates);
-
                     foreach (var item in apiInfo.Apis.GroupBy(x => x.Tags[0]))
                     {
                         if (options.Tags?.Any() == true && !options.Tags.Contains(item.Key))
@@ -52,23 +53,22 @@ namespace AbpProjectTools.Commands
                         var name = item.Key;
                         var apiList = item.ToList();
 
-                        var fileContent = TemplateHelper.RenderString(templateContent, new
+                        var fileContent = templateService.Render("TypeScriptServices", new
                         {
                             Name = name,
                             Apis = apiList,
-                            Count = apiList.Count,
+                            Count = apiList.Count(),
                             Url = options.SwaggerUrl,
                             Debug = options.Debug,
                             ProjectName = options.ProjectName,
                         });
 
-                        FileWrite(Path.Combine(outputPath, $"{name}.ts"), fileContent, true);
+                        WriteFileContent(Path.Combine(outputPath, $"{name}.ts"), fileContent, true);
                     }
                 }
                 else
                 {
-                    var templateContent = TemplateFileHelper.GetFileContent("TypeScriptServices", options.Templates);
-                    var fileContent = TemplateHelper.RenderString(templateContent, new
+                    var fileContent = templateService.Render("TypeScriptService", new
                     {
                         Apis = apiInfo.Apis.ToList(),
                         Count = apiInfo.Apis.Count,
@@ -77,19 +77,17 @@ namespace AbpProjectTools.Commands
                         ProjectName = options.ProjectName,
                     });
 
-                    FileWrite(Path.Combine(outputPath, "services.ts"), fileContent, true);
+                    WriteFileContent(Path.Combine(outputPath, "services.ts"), fileContent, true);
                 }
 
 
                 if (options.SplitType)
                 {
-                    var templateContent = TemplateFileHelper.GetFileContent("TypeScriptType", options.Templates);
-
                     foreach (var item in apiInfo.Schames)
                     {
                         var name = item.Name;
 
-                        var fileContent = TemplateHelper.RenderString(templateContent, new
+                        var fileContent = templateService.Render("TypeScriptType", new
                         {
                             schame = item,
                             Url = options.SwaggerUrl,
@@ -97,13 +95,12 @@ namespace AbpProjectTools.Commands
                             ProjectName = options.ProjectName,
                         });
 
-                        FileWrite(Path.Combine(outputPath, $"{name}.typings.d.ts"), fileContent, true);
+                        WriteFileContent(Path.Combine(outputPath, $"{name}.typings.d.ts"), fileContent, true);
                     }
                 }
                 else
                 {
-                    var templateContent = TemplateFileHelper.GetFileContent("TypeScriptTypes", options.Templates);
-                    var fileContent = TemplateHelper.RenderString(templateContent, new
+                    var fileContent = templateService.Render("TypeScriptTypes", new
                     {
                         schames = apiInfo.Schames.ToList(),
                         Count = apiInfo.Schames.Count,
@@ -112,7 +109,7 @@ namespace AbpProjectTools.Commands
                         ProjectName = options.ProjectName,
                     });
 
-                    FileWrite(Path.Combine(outputPath, "typings.d.ts"), fileContent, true);
+                    WriteFileContent(Path.Combine(outputPath, "typings.d.ts"), fileContent, true);
                 }
 
                 Console.WriteLine("🎉 Done. ");

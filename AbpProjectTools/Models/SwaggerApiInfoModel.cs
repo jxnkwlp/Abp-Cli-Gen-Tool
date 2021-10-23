@@ -1,5 +1,5 @@
-﻿using AbpProjectTools.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using AbpProjectTools.Models;
 
 namespace AbpProjectTools
 {

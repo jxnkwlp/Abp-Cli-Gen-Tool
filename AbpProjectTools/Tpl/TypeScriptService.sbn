@@ -1,7 +1,8 @@
 ﻿/**
-* Generate from swagger json url: {{url}} 
+* Generate from swagger json url: {{url}}
 **/
-
+// @ts-ignore
+/* eslint-disable */
 import { request } from 'umi';
 
 {{-func renderType(type, name)
@@ -33,7 +34,7 @@ end-}}
         {{ $item.name | camel_case}}: {{renderType $item.type $item.type_name }} {{~ for.last?"":"," ~}}
     {{~end~}}
 {{~end~}}
- 
+
 /**
 *  {{api.summary ?? '*TODO*'}} {{api.method | string.upcase}} {{api.path}}
 *  {{if debug}}{{api|json}}{{end}}
@@ -52,4 +53,4 @@ export async function {{api.operation_id}}(
     {{~if api.request_param_schame ~}} data: payload, {{~end~}}
     ...(options || {}),
   });
-} 
+}

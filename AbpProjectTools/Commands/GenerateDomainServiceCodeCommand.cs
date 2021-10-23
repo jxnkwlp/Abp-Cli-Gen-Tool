@@ -1,7 +1,9 @@
 ﻿using System;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.Drawing;
 using System.IO;
+using Pastel;
 
 namespace AbpProjectTools.Commands
 {
@@ -11,50 +13,29 @@ namespace AbpProjectTools.Commands
         {
             var command = new Command("domain-service");
 
-            command.AddOption(new Option<string>("--name", "The Domain entity name") { IsRequired = true, });
-
-            command.Handler = CommandHandler.Create<GenerateRepositoryCommandOption>(options =>
+            command.Handler = CommandHandler.Create<BackendCodeGeneratorCommonCommandOption>(options =>
             {
+                var typeService = new TypeService(options.SluDir);
+
+                var templateService = new TemplateService(options.Template);
+
                 try
                 {
-                    Console.WriteLine($"😁 Staring generate domain '{options.Name}' service...");
-                    Console.WriteLine();
+                    Console.WriteLine($"🚗 Staring generate domain '{options.Name}' service code ...");
 
-                    var domainFile = FileHelper.FindFile(options.SluDir, options.Name);
+                    var domainInfo = typeService.GetDomain(options.Name);
 
-                    var domainProjectPath = FileHelper.GetDomainProjectDirectory(options.SluDir);
+                    var fileContent = templateService.Render("DomainService", domainInfo);
 
-                    Console.WriteLine($"Domain project path: {domainProjectPath.FullName}");
-                    Console.WriteLine();
+                    var filePath = Path.Combine(domainInfo.FileDirectory, $"{domainInfo.TypeName}Manager.cs");
 
-
-                    var domain = TypeHelper.GetDomain(domainProjectPath, options.Name);
-                    domain.FileDirectory = domainFile.DirectoryName.Substring(domainProjectPath.FullName.Length + 1);
-                    domain.FileFullName = domainFile.FullName;
-                    domain.ProjectName = GetSolutionName(options.SluDir);
-
-                    Console.WriteLine($"Domain find in '{domain.FileDirectory}', type: '{domain.TypeFullName}' ");
-                    Console.WriteLine();
-
-
-                    // write file 
-                    var code1 = CodeGenerator.GenerateDomainService(domain);
-                    var file1 = Path.Combine(domainFile.DirectoryName, $"{domain.TypeName}Manager.cs");
-
-                    FileWrite(file1, code1, options.Overwite);
-                    Console.WriteLine($"Write file '{file1}'. ");
-
-                    if (File.Exists(file1) && options.Overwite == false)
-                        Console.WriteLine($"The file '{file1}' exists.");
-                    else
-                        File.WriteAllText(file1, code1);
+                    WriteFileContent(filePath, fileContent, options.Overwrite);
 
                     Console.WriteLine("🎉 Done. ");
-
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Console.WriteLine(ex.Message.Pastel(Color.Red));
                 }
             });
 

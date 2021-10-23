@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "AbpProjectTools": {
+      "commandName": "Project",
+      "commandLineArgs": "gen backend http-controller --slu-dir F:\\works\\chen\\ecs-shop --name  WorkOrder"
+    }
+  }
+}

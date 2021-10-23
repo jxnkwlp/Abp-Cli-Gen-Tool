@@ -5,15 +5,15 @@ using AbpProjectTools.Models;
 using NJsonSchema;
 using NSwag;
 
-namespace AbpProjectTools
+namespace AbpProjectTools.Services
 {
-    public class SwaggerHelper
+    public class SwaggerService
     {
         public async Task<SwaggerApiInfoModel> LoadAsync(string url)
         {
             var result = new SwaggerApiInfoModel();
 
-            var document = await NSwag.OpenApiDocument.FromUrlAsync(url);
+            var document = await OpenApiDocument.FromUrlAsync(url);
 
             document.GenerateOperationIds();
 
@@ -38,7 +38,7 @@ namespace AbpProjectTools
                         Type = GetItemType(x.Schema.Type),
                         Description = x.Description,
                         Required = x.IsRequired,
-                        Nullable = !x.IsRequired, 
+                        Nullable = !x.IsRequired,
                     });
                 var queryParams = item
                     .Operation

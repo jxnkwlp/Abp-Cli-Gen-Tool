@@ -1,0 +1,45 @@
+﻿using System;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+using Volo.Abp;
+using Volo.Abp.Application.Dtos;
+using {{domain.type_namespace}};
+
+namespace {{domain.type_namespace}}
+{ 
+    [RemoteService]
+    [Route("api/{{domain.type_name}}")]
+    public class {{domain.type_name}}Controller : {{domain.project_name}}Controller, I{{domain.type_name}}AppService
+    {
+        private readonly I{{domain.type_name}}AppService _service;
+
+        public {{domain.type_name}}Controller(I{{domain.type_name}}AppService service)
+        {
+            _service = service;
+        }
+
+{{~for item in app_services~}}
+    {{~if !item.is_inherited~}}
+        [{{routes[item.name].method}}({{routes[item.name].url ? "\""+routes[item.name].url+"\"" : "" }})]
+        public virtual {{item.return_type}} {{~item.return_type_arguments.size>0?"<":"" ~}}
+    {{-for p in item.return_type_arguments-}}
+                {{p.name}}{{for.last ? "":","}}
+    {{-end-}}
+    {{- item.return_type_arguments.size > 0 ? "> ":" " -}}
+            {{-item.name}}(
+        {{-for p in item.params-}}
+                {{p.type}} {{p.name}}{{for.last?"":", "}}
+        {{-end-}}
+        )
+        {
+            return _service.{{item.name}}(
+                {{-for p in item.params-}}
+                    {{p.name}}{{for.last?"":", "}}
+                {{-end-}}
+            );
+        }
+
+    {{~end~}}
+{{~end~}}
+    }
+}

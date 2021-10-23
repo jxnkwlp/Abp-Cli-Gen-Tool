@@ -1,0 +1,24 @@
+﻿using System;
+using System.Threading.Tasks;
+using Volo.Abp.Application.Dtos;
+using Volo.Abp.Application.Services;
+
+namespace {{domain.type_namespace}}
+{
+    {{~if is_list_request_type~}}
+    public class {{type_name}} : PagedResultRequestDto
+    {{~else if is_create_type || is_update_type ~}}
+    public class {{type_name}}
+    {{~else if is_entity_type~}}
+    public class {{type_name}} : AuditedEntityDto<{{domain.type_key}}>
+    {{~end~}}
+    {
+        {{~if !is_list_request_type~}}
+{{~for item in domain.properties~}}
+    {{~if !item.is_inherited~}}
+        public {{item.type}}{{item.is_nullable?"?":""}} {{item.name}} { get; set; }
+    {{~end~}}
+{{~end~}}
+        {{~end~}}
+    }
+}

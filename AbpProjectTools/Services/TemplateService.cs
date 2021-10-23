@@ -1,17 +1,53 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using System.IO;
+using System.Linq;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Scriban;
 using Scriban.Runtime;
-using System;
-using System.IO;
-using System.Linq;
 
 namespace AbpProjectTools
 {
-    public static class TemplateHelper
+    public class TemplateService
     {
-        public static string RenderString(string content, object data = null)
+        private readonly string _tempateDir;
+
+        public TemplateService(string tempateDir = null)
         {
+            _tempateDir = tempateDir;
+        }
+
+        private static string GetBaseDirectory()
+        {
+            return AppContext.BaseDirectory;
+        }
+
+        public static string GetFileContent(string fileName, string searchDirectory = null)
+        {
+            if (!string.IsNullOrEmpty(searchDirectory) && Directory.Exists(searchDirectory))
+            {
+                var filePath = Path.Combine(searchDirectory, $"{fileName}.sbn");
+                if (File.Exists(filePath))
+                {
+                    return File.ReadAllText(filePath);
+                }
+            }
+            else
+            {
+                var filePath = Path.Combine(GetBaseDirectory(), $"./Tpl/{fileName}.sbn");
+                if (File.Exists(filePath))
+                {
+                    return File.ReadAllText(filePath);
+                }
+            }
+
+            throw new System.Exception($"The template file '{fileName}' not found.");
+        }
+
+        public string Render(string fileName, object data = null)
+        {
+            var content = GetFileContent(fileName, _tempateDir);
+
             var scriptObject1 = new ScriptObject();
             scriptObject1.Import(typeof(RenderFunctions));
             scriptObject1.Import(data);
@@ -28,13 +64,6 @@ namespace AbpProjectTools
             return template.Render(context);
         }
 
-        public static string RenderStringFromFile(string file, object data = null)
-        {
-            if (!File.Exists(file))
-                throw new FileNotFoundException(file);
-
-            return RenderString(File.ReadAllText(file), data);
-        }
     }
 
     public static class RenderFunctions

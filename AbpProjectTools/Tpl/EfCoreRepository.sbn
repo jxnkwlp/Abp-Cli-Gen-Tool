@@ -1,0 +1,46 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Dynamic.Core;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using Volo.Abp.Domain.Repositories.EntityFrameworkCore;
+using Volo.Abp.EntityFrameworkCore;
+using {{domain.type_namespace}};
+
+namespace {{ef.type_namespace}}.Repositories
+{
+    public class {{domain.type_name}}Repository : EfCoreRepository<{{ef.type_name}}, {{domain.type_name}}, {{domain.type_key}}>, I{{domain.type_name}}Repository
+    {
+        public {{domain.type_name}}Repository(IDbContextProvider<{{ef.type_name}}> dbContextProvider) : base(dbContextProvider)
+        {
+        }
+
+        public async Task<long> GetCountAsync(string filter, CancellationToken cancellationToken = default)
+        {
+            return await this
+                //.WhereIf(!string.IsNullOrEmpty(filter), TODO )
+                .LongCountAsync(cancellationToken);
+        }
+
+        public async Task<List<{{domain.type_name}}>> GetListAsync(string filter, bool includeDetails = false, CancellationToken cancellationToken = default)
+        {
+            return await this
+                //.IncludeIf(includeDetails, TODO )
+                //.WhereIf(!string.IsNullOrEmpty(filter), TODO )
+                .ToListAsync(cancellationToken);
+        }
+
+        public async Task<List<{{domain.type_name}}>> GetPagedListAsync(int skipCount, int maxResultCount, string filter, string sorting, bool includeDetails = false, CancellationToken cancellationToken = default)
+        {
+            return await this
+                //.IncludeIf(includeDetails, TODO )
+                //.WhereIf(!string.IsNullOrEmpty(filter), TODO )
+                .PageBy(skipCount, maxResultCount)
+                .OrderBy(sorting ?? nameof({{domain.type_name}}.CreationTime) + " desc")
+                .ToListAsync(cancellationToken);
+        }
+
+    }
+}

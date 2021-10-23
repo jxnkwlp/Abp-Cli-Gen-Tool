@@ -1,7 +1,9 @@
 ﻿using System;
 using System.CommandLine;
+using System.Drawing;
 using System.IO;
 using System.Linq;
+using Pastel;
 
 namespace AbpProjectTools.Commands
 {
@@ -9,21 +11,27 @@ namespace AbpProjectTools.Commands
     {
         public abstract Command GetCommand();
 
-        protected static void FileWrite(string filePath, string content, bool overwite = false)
+        protected static void WriteFileContent(string filePath, string content, bool overwrite = false)
         {
             var directory = Path.GetDirectoryName(filePath);
 
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
 
-            if (File.Exists(filePath) && overwite == false)
+#if DEBUG
+            Console.WriteLine($"⬇️⬇️ File '{filePath}' Content Preview ... ".Pastel(Color.Aqua));
+            Console.WriteLine(content.Pastel(Color.Aqua));
+            Console.WriteLine();
+#endif
+
+            if (File.Exists(filePath) && overwrite == false)
             {
-                Console.WriteLine($"The file '{filePath}' exists.");
+                Console.WriteLine($"➡️ The file '{filePath}' exists.".Pastel(Color.Yellow));
             }
             else
             {
                 File.WriteAllText(filePath, content);
-                Console.WriteLine($"Write file '{filePath}' successful.");
+                Console.WriteLine($"⬇️ Write file '{filePath}' successful.".Pastel(Color.Green));
             }
         }
 

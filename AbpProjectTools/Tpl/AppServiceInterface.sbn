@@ -1,0 +1,14 @@
+﻿using System;
+using System.Threading.Tasks;
+using Volo.Abp.Application.Services;
+
+namespace {{domain.type_namespace}}
+{
+    {{~if basic_service~}}
+    public interface I{{domain.type_name}}AppService : IApplicationService
+    {{~else~}}
+    public interface I{{domain.type_name}}AppService : ICrudAppService<{{domain.type_name}}Dto, {{domain.type_key}}, {{list_request_type_name}}, {{create_type_name}}, {{update_type_name}}>
+    {{~end~}}
+    {
+    }
+}

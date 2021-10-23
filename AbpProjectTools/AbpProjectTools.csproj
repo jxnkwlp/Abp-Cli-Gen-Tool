@@ -6,7 +6,7 @@
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>abptool</ToolCommandName>
         <PackageId>Passingwind.$(AssemblyName)</PackageId>
-        <Version>0.1</Version>
+        <Version>0.3.0</Version>
         <Authors>Passingwind</Authors>
         <Copyright>Passingwind</Copyright>
         <PackageProjectUrl>https://github.com/jxnkwlp/Abp-Cli-Gen-Tool</PackageProjectUrl>
@@ -16,11 +16,16 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="Commands\GenerateDomainAllCodeCommand.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="NSwag.Core" Version="13.13.2" />
         <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21308.1" />
         <PackageReference Include="ICSharpCode.Decompiler" Version="7.1.0.6543" />
         <PackageReference Include="Scriban" Version="4.1.0" />
         <PackageReference Include="NJsonSchema.CodeGeneration.TypeScript" Version="10.5.2" />
+        <PackageReference Include="Pastel" Version="2.1.0" />
     </ItemGroup>
 
     <ItemGroup>
@@ -30,6 +35,8 @@
         <None Update="Tpl\*.sbn">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
+        <Content Update="Tpl\*.sbn"></Content>
+        <Content Update="Tpl\*.txt"></Content>
     </ItemGroup>
 
 </Project>
