@@ -7,7 +7,10 @@ namespace AbpProjectTools.Models
         public string Name { get; set; }
 
         public bool Enumerable { get; set; }
+
         public List<object> EnumValues { get; set; }
+
+        public List<string> EnumNames { get; set; }
 
         public IList<ApiParamItem> Params { get; set; }
     }

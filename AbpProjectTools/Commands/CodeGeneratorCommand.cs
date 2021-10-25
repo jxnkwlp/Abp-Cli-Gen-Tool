@@ -17,6 +17,7 @@ namespace AbpProjectTools.Commands
 
             backendCommand.AddGlobalOption(new Option<string>("--slu-dir", "The solution root dir") { IsRequired = true, });
             backendCommand.AddGlobalOption(new Option<string>("--name", "The Domain entity name") { IsRequired = true, });
+            backendCommand.AddGlobalOption(new Option<string>("--project-name", "The project name") { IsRequired = true, });
             backendCommand.AddGlobalOption(new Option<bool>("--overwrite", () => false));
             backendCommand.AddGlobalOption(new Option<string>("--templates", "The template files directory"));
 
@@ -41,6 +42,7 @@ namespace AbpProjectTools.Commands
     {
         public string SluDir { get; set; }
         public string Name { get; set; }
+        public string ProjectName { get; set; }
         public bool Overwrite { get; set; }
         public string Template { get; set; }
     }
@@ -48,9 +50,14 @@ namespace AbpProjectTools.Commands
     public class GenerateAppServiceCommandOption : BackendCodeGeneratorCommonCommandOption
     {
         public string ListRequestTypeName { get; set; }
+        public string ListResultTypeName { get; set; }
         public string CreateTypeName { get; set; }
         public string UpdateTypeName { get; set; }
-        public bool Split { get; set; }
+
+        public bool SplitCuType { get; set; }
+        public bool SplitListResultType { get; set; }
+
+        public bool Crud { get; set; }
 
         /// <summary>
         ///  custom app service 

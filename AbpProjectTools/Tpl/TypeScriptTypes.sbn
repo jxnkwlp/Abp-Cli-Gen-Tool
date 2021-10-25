@@ -1,8 +1,8 @@
 ﻿/**
-* Generate from swagger json url: {{url}}
-* Total count: {{schames.size}}
-**/
-{{ func renderType(type,name)
+ * Generate from swagger json url: {{url}}
+ * Total count: {{schames.size}}
+ **/
+{{- func renderType(type,name)
     if type == 1
         ret "string"
     else if type == 2
@@ -18,25 +18,25 @@
     else
         ret "any"
     end
-end-}}
+end -}}
 
-{{- func out_path_params (params) }}
-        {{for $item in params }}
-            {{- $item.name}}{{$item.required?"":"?"}}: {{ renderType $item.type $item.type_name }}{{$item.required?"":" | undefined"}} {{for.last?"":","}} {{-}}
-        {{end -}}
-{{end -}}
+{{~ func output_params (params) ~}}
+    {{~ for $item in params ~}}
+        {{ $item.name}}{{$item.required?"":"?"}}: {{ renderType $item.type $item.type_name }}{{$item.required?"":" | undefined"}} {{for.last?"":","}}
+    {{~ end ~}}
+{{~ end ~}}
 
 declare namespace {{project_name ?? "API"}} {
-{{- for type in schames }}
+{{~ for type in schames ~}}
+    {{~if !type.enumerable ~}}
     /**
-    *  {{type.description ?? "*TODO*"}}
-    **/
-    {{~if type.enumerable~}}
-    type {{type.name}} = {{for $v in type.enum_values }} {{$v}} {{for.last?" ; ":"|"}}{{end}}
-    {{~else~}}
+     *  {{type.description ?? "*TODO*"}}
+     **/
     type {{type.name}} = {
-        {{- out_path_params type.params -}}
-    }
+{{~ output_params type.params ~}}
+    };
+
     {{~end~}}
-{{ end }}
+{{~ end ~}}
+
 }

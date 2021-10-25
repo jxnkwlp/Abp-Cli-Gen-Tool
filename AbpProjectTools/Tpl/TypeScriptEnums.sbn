@@ -1,0 +1,23 @@
+﻿/**
+ * Generate from swagger json url: {{url}} 
+ **/
+/**
+ * enum types
+* */
+{{~ for type in schames ~}}
+    {{~if type.enumerable ~}}
+/**
+ *  {{type.description ?? "*TODO*"}}
+ **/
+{{~ if type.enum_names ~}}
+export enum {{type.name}} {
+    {{~ for $v in type.enum_values ~}}
+    {{type.enum_names[for.index]}} = {{$v}}{{for.last?" ":","}}
+    {{~end~}}
+}
+{{~else~}}
+export type {{type.name}} = {{for $v in type.enum_values }} {{$v}} {{for.last?" ; ":"|"}}{{end}}
+{{~end~}}
+
+    {{~end~}}
+{{~ end ~}}

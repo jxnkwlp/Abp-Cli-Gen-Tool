@@ -31,6 +31,7 @@ namespace AbpProjectTools.Commands
 
                     var fileContent = templateService.Render("HttpApiController", new
                     {
+                        projectName = options.ProjectName,
                         domain = domainInfo,
                         appServices = appServiceInfo.Methods,
                         routes = GenerateRoute(appServiceInfo.Methods),

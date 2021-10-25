@@ -6,10 +6,10 @@ using Volo.Abp.Application.Dtos;
 using {{domain.type_namespace}};
 
 namespace {{domain.type_namespace}}
-{ 
+{
     [RemoteService]
     [Route("api/{{domain.type_name}}")]
-    public class {{domain.type_name}}Controller : {{domain.project_name}}Controller, I{{domain.type_name}}AppService
+    public class {{domain.type_name}}Controller : {{project_name}}Controller, I{{domain.type_name}}AppService
     {
         private readonly I{{domain.type_name}}AppService _service;
 

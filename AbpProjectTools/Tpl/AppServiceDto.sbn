@@ -7,6 +7,8 @@ namespace {{domain.type_namespace}}
 {
     {{~if is_list_request_type~}}
     public class {{type_name}} : PagedResultRequestDto
+    {{~else if is_list_result_type~}}
+    public class {{type_name}} : EntityDto<{{domain.type_key}}>
     {{~else if is_create_type || is_update_type ~}}
     public class {{type_name}}
     {{~else if is_entity_type~}}

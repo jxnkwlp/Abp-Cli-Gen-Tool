@@ -2,7 +2,7 @@
   "profiles": {
     "AbpProjectTools": {
       "commandName": "Project",
-      "commandLineArgs": "gen backend http-controller --slu-dir F:\\works\\chen\\ecs-shop --name  WorkOrder"
+      "commandLineArgs": "gen fontend ts --swagger-url http://localhost:56876/swagger/v1/swagger.json --output F:\\works\\chen\\ecs-shop\\src\\ClientApp\\src\\services\\Biz  --tags Disk"
     }
   }
 }

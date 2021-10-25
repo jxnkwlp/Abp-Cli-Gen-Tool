@@ -125,8 +125,6 @@ namespace AbpProjectTools
                     FileProjectPath = csFile.DirectoryName.Substring(domainProject.FullName.Length + 1),
 
                     Properties = typeProperties,
-
-                    ProjectName = rootNamespace
                 };
             }
             catch (Exception)

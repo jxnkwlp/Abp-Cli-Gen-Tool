@@ -4,10 +4,10 @@ namespace AbpProjectTools
 {
     public class DomainEntityDefinitions
     {
-        /// <summary>
-        ///  The Project name 
-        /// </summary>
-        public string ProjectName { get; set; }
+        ///// <summary>
+        /////  The Project name 
+        ///// </summary>
+        //public string ProjectName { get; set; }
 
         /// <summary>
         ///  The entity type key 

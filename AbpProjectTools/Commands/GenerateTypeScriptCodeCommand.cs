@@ -55,6 +55,7 @@ namespace AbpProjectTools.Commands
 
                         var fileContent = templateService.Render("TypeScriptServices", new
                         {
+                            projectName = options.ProjectName,
                             Name = name,
                             Apis = apiList,
                             Count = apiList.Count(),
@@ -70,6 +71,7 @@ namespace AbpProjectTools.Commands
                 {
                     var fileContent = templateService.Render("TypeScriptService", new
                     {
+                        projectName = options.ProjectName,
                         Apis = apiInfo.Apis.ToList(),
                         Count = apiInfo.Apis.Count,
                         Url = options.SwaggerUrl,
@@ -83,25 +85,28 @@ namespace AbpProjectTools.Commands
 
                 if (options.SplitType)
                 {
-                    foreach (var item in apiInfo.Schames)
-                    {
-                        var name = item.Name;
+                    // TODO 
+                    //foreach (var item in apiInfo.Schames)
+                    //{
+                    //    var name = item.Name;
 
-                        var fileContent = templateService.Render("TypeScriptType", new
-                        {
-                            schame = item,
-                            Url = options.SwaggerUrl,
-                            Debug = options.Debug,
-                            ProjectName = options.ProjectName,
-                        });
+                    //    var fileContent = templateService.Render("TypeScriptType", new
+                    //    {
+                    //        projectName = options.ProjectName,
+                    //        schame = item,
+                    //        Url = options.SwaggerUrl,
+                    //        Debug = options.Debug,
+                    //        ProjectName = options.ProjectName,
+                    //    });
 
-                        WriteFileContent(Path.Combine(outputPath, $"{name}.typings.d.ts"), fileContent, true);
-                    }
+                    //    WriteFileContent(Path.Combine(outputPath, $"{name}.typings.d.ts"), fileContent, true);
+                    //}
                 }
                 else
                 {
                     var fileContent = templateService.Render("TypeScriptTypes", new
                     {
+                        projectName = options.ProjectName,
                         schames = apiInfo.Schames.ToList(),
                         Count = apiInfo.Schames.Count,
                         Url = options.SwaggerUrl,
@@ -110,6 +115,18 @@ namespace AbpProjectTools.Commands
                     });
 
                     WriteFileContent(Path.Combine(outputPath, "typings.d.ts"), fileContent, true);
+
+                    fileContent = templateService.Render("TypeScriptEnums", new
+                    {
+                        projectName = options.ProjectName,
+                        schames = apiInfo.Schames.ToList(),
+                        Count = apiInfo.Schames.Count,
+                        Url = options.SwaggerUrl,
+                        Debug = options.Debug,
+                        ProjectName = options.ProjectName,
+                    });
+
+                    WriteFileContent(Path.Combine(outputPath, "enums.ts"), fileContent, true);
                 }
 
                 Console.WriteLine("🎉 Done. ");

@@ -124,6 +124,7 @@ namespace AbpProjectTools.Services
                 {
                     s.Enumerable = true;
                     s.EnumValues = item.Value.Enumeration?.ToList();
+                    s.EnumNames = item.Value.EnumerationNames?.ToList();
                 }
                 else
                 {
@@ -135,7 +136,7 @@ namespace AbpProjectTools.Services
                             Type = GetItemType(prop.Value.Type),
                             // TypeName = prop.Value.HasReference ? prop.Value.Reference.Title : (prop.Value.Type == JsonObjectType.Array ? GetItemType(prop.Value.Item.Type).ToString() : null),
                             Description = prop.Value.Description,
-                            Required = prop.Value.IsRequired,
+                            Required = prop.Value.IsNullableRaw == true ? false : true,
                         };
 
                         if (prop.Value.HasReference)
@@ -145,6 +146,14 @@ namespace AbpProjectTools.Services
                         }
                         else
                         {
+
+                            //if (prop.Value.IsEnumeration)
+                            //{
+                            //    p.Enumerable = true;
+                            //    p.EnumValues = prop.Value.Enumeration?.ToList();
+                            //    p.EnumNames = prop.Value.EnumerationNames?.ToList();
+                            //}
+
                             if (p.Type == ApiParamType.Array)
                             {
                                 var arrayItem = prop.Value.Item;

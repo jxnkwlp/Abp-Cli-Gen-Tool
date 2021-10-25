@@ -14,10 +14,13 @@ namespace AbpProjectTools.Commands
             var command = new Command("app-service");
 
             command.AddOption(new Option<string>("--list-request-type-name", ""));
+            command.AddOption(new Option<string>("--list-result-type-name", ""));
             command.AddOption(new Option<string>("--create-type-name", ""));
             command.AddOption(new Option<string>("--update-type-name", ""));
-            command.AddOption(new Option<bool>("--split", () => false, ""));
+            command.AddOption(new Option<bool>("--split-list-result-type", () => false, ""));
+            command.AddOption(new Option<bool>("--split-cu-type", () => false, ""));
             command.AddOption(new Option<bool>("--basic-service", ""));
+            command.AddOption(new Option<bool>("--crud", () => true, ""));
 
             command.Handler = CommandHandler.Create<GenerateAppServiceCommandOption>(options =>
             {
@@ -30,12 +33,19 @@ namespace AbpProjectTools.Commands
                 if (string.IsNullOrEmpty(options.UpdateTypeName))
                     options.UpdateTypeName = $"{options.Name}UpdateDto";
 
-                if (!options.Split)
+                if (string.IsNullOrEmpty(options.ListResultTypeName))
+                    options.ListResultTypeName = $"{options.Name}Dto";
+
+                if (!options.SplitCuType)
                 {
                     options.CreateTypeName = $"{options.Name}CreateOrUpdateDto";
                     options.UpdateTypeName = $"{options.Name}CreateOrUpdateDto";
                 }
 
+                if (options.SplitListResultType)
+                {
+                    options.ListResultTypeName = $"{options.Name}BasicDto";
+                }
 
                 var typeService = new TypeService(options.SluDir);
 
@@ -53,12 +63,16 @@ namespace AbpProjectTools.Commands
                     // service
                     var fileContent = templateService.Render("AppServiceInterface", new
                     {
+                        projectName = options.ProjectName,
                         domain = domainInfo,
                         CreateTypeName = options.CreateTypeName,
                         UpdateTypeName = options.UpdateTypeName,
                         ListRequestTypeName = options.ListRequestTypeName,
-                        Split = options.Split,
+                        ListResultTypeName = options.ListResultTypeName,
+                        SplitCuType = options.SplitCuType,
+                        SplitListType = options.SplitListResultType,
                         BasicService = options.BasicService,
+                        Crud = options.Crud,
                     });
 
                     var filePath = Path.Combine(ContractsProject.FullName, domainInfo.FileProjectPath, $"I{domainInfo.TypeName}AppService.cs");
@@ -68,28 +82,30 @@ namespace AbpProjectTools.Commands
                     // service
                     fileContent = templateService.Render("AppServiceService", new
                     {
+                        projectName = options.ProjectName,
                         domain = domainInfo,
                         CreateTypeName = options.CreateTypeName,
                         UpdateTypeName = options.UpdateTypeName,
                         ListRequestTypeName = options.ListRequestTypeName,
-                        Split = options.Split,
+                        ListResultTypeName = options.ListResultTypeName,
+                        SplitCuType = options.SplitCuType,
+                        SplitListType = options.SplitListResultType,
                         BasicService = options.BasicService,
+                        Crud = options.Crud,
                     });
 
                     filePath = Path.Combine(appServiceProject.FullName, domainInfo.FileProjectPath, $"{domainInfo.TypeName}AppService.cs");
 
                     WriteFileContent(filePath, fileContent, options.Overwrite);
 
-
-
-
                     // dto
                     if (options.BasicService == false)
                     {
-                        void GenerateDto(string typeName, bool isListRequestType = false, bool isCreateType = false, bool isUpdateType = false, bool isEntityType = false)
+                        void GenerateDto(string typeName, bool isListRequestType = false, bool isCreateType = false, bool isUpdateType = false, bool isEntityType = false, bool isListResultType = false)
                         {
                             fileContent = templateService.Render("AppServiceDto", new
                             {
+                                projectName = options.ProjectName,
                                 domain = domainInfo,
                                 TypeName = typeName,
 
@@ -97,6 +113,7 @@ namespace AbpProjectTools.Commands
                                 IsUpdateType = isUpdateType,
                                 IsListRequestType = isListRequestType,
                                 IsEntityType = isEntityType,
+                                isListResultType = isListResultType,
                             });
 
                             filePath = Path.Combine(ContractsProject.FullName, domainInfo.FileProjectPath, $"{typeName}.cs");
@@ -105,9 +122,8 @@ namespace AbpProjectTools.Commands
                         }
 
                         GenerateDto(options.ListRequestTypeName, isListRequestType: true);
-                        GenerateDto($"{domainInfo.TypeName}Dto", isEntityType: true);
 
-                        if (options.Split)
+                        if (options.SplitCuType)
                         {
                             GenerateDto(options.CreateTypeName, isCreateType: true);
                             GenerateDto(options.UpdateTypeName, isUpdateType: true);
@@ -116,6 +132,13 @@ namespace AbpProjectTools.Commands
                         {
                             GenerateDto(options.CreateTypeName, isCreateType: true);
                         }
+
+                        if (options.SplitListResultType)
+                        {
+                            GenerateDto($"{domainInfo.TypeName}BasicDto", isListResultType: true);
+                        }
+
+                        GenerateDto($"{domainInfo.TypeName}Dto", isEntityType: true);
                     }
 
                     Console.WriteLine("🎉 Done. ");
