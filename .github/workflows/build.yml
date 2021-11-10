@@ -22,7 +22,9 @@ jobs:
         dotnet-version: 5.0.x
 
     - name: Install Dotnet Tool
-      run: dotnet tool install -g Passingwind.Git-CI-Tools
+      run: |
+        dotnet tool install -g Passingwind.Git-CI-Tools
+        gitci --version
 
     - name: Set environment variables
       uses: rlespinasse/github-slug-action@3.6.0
