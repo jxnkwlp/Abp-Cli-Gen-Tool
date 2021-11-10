@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using Pluralize.NET;
 using Scriban;
 using Scriban.Runtime;
 
@@ -49,7 +51,7 @@ namespace AbpProjectTools
             var content = GetFileContent(fileName, _tempateDir);
 
             var scriptObject1 = new ScriptObject();
-            scriptObject1.Import(typeof(RenderFunctions));
+            scriptObject1.Import(typeof(RenderHelperFunctions));
             scriptObject1.Import(data);
 
             var context = new TemplateContext();
@@ -66,7 +68,7 @@ namespace AbpProjectTools
 
     }
 
-    public static class RenderFunctions
+    public static class RenderHelperFunctions
     {
         public static string Json(object value)
         {
@@ -93,5 +95,47 @@ namespace AbpProjectTools
 
             return source[0].ToString().ToLower() + source.Substring(1);
         }
+
+        public static string ToSlugString(string source)
+        {
+            if (source == null)
+                return source;
+
+            StringBuilder sb = new StringBuilder();
+
+            foreach (var item in source)
+            {
+                if (char.IsUpper(item))
+                {
+                    if (sb.Length > 0)
+                        sb.Append('-').Append(char.ToLower(item));
+                    else
+                        sb.Append(char.ToLower(item));
+                }
+                else
+                {
+                    sb.Append(item);
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        public static string ToPluralize(string source)
+        {
+            if (source == null)
+                return source;
+
+            return new Pluralizer().Pluralize(source);
+        }
+
+        public static string ToSingularize(string source)
+        {
+            if (source == null)
+                return source;
+
+            return new Pluralizer().Singularize(source);
+        }
+
     }
 }

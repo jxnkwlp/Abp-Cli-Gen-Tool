@@ -19,6 +19,7 @@ namespace AbpProjectTools
             var rootCommand = new RootCommand()
             {
                 Description = "Abp project tools",
+                Name = "abptool",
             };
 
             rootCommand.AddCommand(new CodeGeneratorCommand().GetCommand());

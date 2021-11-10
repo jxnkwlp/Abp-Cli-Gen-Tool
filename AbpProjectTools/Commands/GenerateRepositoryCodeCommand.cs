@@ -11,7 +11,7 @@ namespace AbpProjectTools.Commands
     {
         public override Command GetCommand()
         {
-            var command = new Command("repository");
+            var command = new Command("repository","Generate an domain repository (include efcore repository)");
 
             command.Handler = CommandHandler.Create<BackendCodeGeneratorCommonCommandOption>(options =>
             {
@@ -44,6 +44,7 @@ namespace AbpProjectTools.Commands
                 catch (Exception ex)
                 {
                     Console.WriteLine(ex.Message.Pastel(Color.Red));
+                    throw;
                 }
             });
 

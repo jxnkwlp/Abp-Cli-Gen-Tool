@@ -11,7 +11,7 @@ namespace AbpProjectTools.Commands
     {
         public override Command GetCommand()
         {
-            var command = new Command("domain-service");
+            var command = new Command("domain-service","Generate an empty domain service code");
 
             command.Handler = CommandHandler.Create<BackendCodeGeneratorCommonCommandOption>(options =>
             {

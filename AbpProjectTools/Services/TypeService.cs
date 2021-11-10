@@ -19,7 +19,7 @@ namespace AbpProjectTools
         public TypeService(string solutionDir)
         {
             _solutionDir = solutionDir;
-            _hostProjectDirectory = FileHelper.GetWebProjectDirectory(_solutionDir);
+            _hostProjectDirectory = FileHelper.GetHostProjectDirectory(_solutionDir);
         }
 
         private CSharpDecompiler GetDecompiler(string fileName)
@@ -108,7 +108,7 @@ namespace AbpProjectTools
                         {
                             Name = item.Name,
                             Type = GetTypeCodeString(item.ReturnType),
-                            IsNullable = item.ReturnType.Nullability == Nullability.Nullable,
+                            IsNullable = item.ReturnType.FullName == "System.Nullable",
                             IsInherited = item.DeclaringTypeDefinition != findType
                         });
                     }
@@ -178,6 +178,8 @@ namespace AbpProjectTools
 
             try
             {
+                var csFile = appContractProject.EnumerateFiles($"I{name}AppService.cs", SearchOption.AllDirectories).FirstOrDefault();
+
                 var dllFile = appContractProject.EnumerateFiles("bin/**.Application.Contracts.dll", SearchOption.AllDirectories).FirstOrDefault();
 
                 if (dllFile == null)
@@ -210,6 +212,9 @@ namespace AbpProjectTools
 
                 return new AppServiceDefinition
                 {
+                    Name = appServiceType.Name[1..].Replace("AppService", null),
+                    Namespace = appServiceType.Namespace,
+                    FileProjectPath = csFile.DirectoryName.Substring(appContractProject.FullName.Length + 1),
                     Methods = methods.ToList(),
                 };
             }
@@ -254,19 +259,26 @@ namespace AbpProjectTools
 
             switch (type.GetTypeCode())
             {
+                //case TypeCode.Empty: return "";
+                case TypeCode.Object: return "object";
+                //case TypeCode.DBNull: return "";
                 case TypeCode.Boolean: return "bool";
                 case TypeCode.Char: return "char";
-                case TypeCode.SByte: return "byte";
-                case TypeCode.Byte: return "bool";
+                case TypeCode.SByte: return "sbyte";
+                case TypeCode.Byte: return "byte";
                 case TypeCode.Int16: return "short";
+                case TypeCode.UInt16: return "ushort";
                 case TypeCode.Int32: return "int";
+                case TypeCode.UInt32: return "uint";
+                case TypeCode.Int64: return "long";
                 case TypeCode.UInt64: return "ulong";
-                case TypeCode.DateTime: return "datetime";
-                case TypeCode.Decimal: return "decimal";
+                case TypeCode.Single: return "float";
                 case TypeCode.Double: return "double";
+                case TypeCode.Decimal: return "decimal";
+                case TypeCode.DateTime: return "DateTime";
                 case TypeCode.String: return "string";
                 default:
-                    throw new Exception($"Unknow type code '{type.GetTypeCode()}'. ");
+                    throw new Exception($"Unknow type code '{type.GetTypeCode()}'");
             }
         }
     }
@@ -315,5 +327,12 @@ namespace AbpProjectTools
     public class AppServiceDefinition
     {
         public IList<TypeMethodInfo> Methods { get; set; }
+
+        public string Namespace { get; set; }
+
+        public string Name { get; set; }
+
+        public string FileProjectPath { get; set; }
+
     }
 }

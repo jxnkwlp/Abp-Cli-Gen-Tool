@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using System.IO;
 
 namespace AbpProjectTools.Commands
 {
@@ -10,15 +11,15 @@ namespace AbpProjectTools.Commands
 
         public override Command GetCommand()
         {
-            var command = new Command("generate");
+            var command = new Command("generate", "Code generate");
             command.AddAlias("gen");
 
-            var backendCommand = new Command("backend");
+            var backendCommand = new Command("backend", "Generate abp repository, CRUD app service, http controller code");
 
-            backendCommand.AddGlobalOption(new Option<string>("--slu-dir", "The solution root dir") { IsRequired = true, });
-            backendCommand.AddGlobalOption(new Option<string>("--name", "The Domain entity name") { IsRequired = true, });
-            backendCommand.AddGlobalOption(new Option<string>("--project-name", "The project name") { IsRequired = true, });
-            backendCommand.AddGlobalOption(new Option<bool>("--overwrite", () => false));
+            backendCommand.AddGlobalOption(new Option<string>("--slu-dir", () => Directory.GetCurrentDirectory(), "The solution root dir. Default is current directory") { IsRequired = false, });
+            backendCommand.AddGlobalOption(new Option<string>("--name", "The name of entity or app service") { IsRequired = true, });
+            backendCommand.AddGlobalOption(new Option<string>("--project-name", () => GetDefaultSolutionName(), "The project name. Default is solution name if found in solution directory") { IsRequired = true, });
+            backendCommand.AddGlobalOption(new Option<bool>("--overwrite", () => false, "Over write file if the target file exists"));
             backendCommand.AddGlobalOption(new Option<string>("--templates", "The template files directory"));
 
             backendCommand.AddCommand(new GenerateDomainServiceCodeCommand().GetCommand());
@@ -28,7 +29,7 @@ namespace AbpProjectTools.Commands
 
             command.AddCommand(backendCommand);
 
-            var fontendCommand = new Command("fontend");
+            var fontendCommand = new Command("fontend", "Generate ts type and service code");
             fontendCommand.AddCommand(new GenerateTypeScriptCodeCommand().GetCommand());
 
             command.AddCommand(fontendCommand);
@@ -36,6 +37,24 @@ namespace AbpProjectTools.Commands
             return command;
         }
 
+        static string GetDefaultSolutionName()
+        {
+            var slnFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.sln", SearchOption.TopDirectoryOnly);
+
+            if (slnFiles?.Length == 1)
+            {
+                var name = Path.GetFileNameWithoutExtension(slnFiles[0]);
+
+                if (name.LastIndexOf('.') > 0)
+                {
+                    name = name.Substring(name.LastIndexOf('.') + 1);
+                }
+
+                return name;
+            }
+
+            return null;
+        }
     }
 
     public class BackendCodeGeneratorCommonCommandOption

@@ -11,7 +11,7 @@ namespace AbpProjectTools.Commands
     {
         public override Command GetCommand()
         {
-            var command = new Command("app-service");
+            var command = new Command("app-service", "Generate CRUD app service code");
 
             command.AddOption(new Option<string>("--list-request-type-name", ""));
             command.AddOption(new Option<string>("--list-result-type-name", ""));
@@ -56,7 +56,7 @@ namespace AbpProjectTools.Commands
 
                 try
                 {
-                    Console.WriteLine($"🚗 Staring generate domain '{options.Name}' app service code ...");
+                    Console.WriteLine($"🚗 Staring generate '{options.Name}' app service code ...");
 
                     var domainInfo = typeService.GetDomain(options.Name, true);
 

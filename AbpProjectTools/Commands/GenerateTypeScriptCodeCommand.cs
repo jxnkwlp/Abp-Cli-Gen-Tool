@@ -11,7 +11,7 @@ namespace AbpProjectTools.Commands
     {
         public override Command GetCommand()
         {
-            var command = new Command("ts");
+            var command = new Command("ts","Generate ts types and services code base on swagger json document");
 
             command.AddOption(new Option<string>("--swagger-url", "The swagger api json document url") { IsRequired = true, });
             command.AddOption(new Option<string>(new[] { "--output", "-o" }, "") { IsRequired = true, });

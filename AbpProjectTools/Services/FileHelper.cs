@@ -20,11 +20,31 @@ namespace AbpProjectTools
             return file;
         }
 
-        public static DirectoryInfo GetWebProjectDirectory(string root)
+        public static DirectoryInfo GetHostProjectDirectory(string root)
         {
             var dir = new DirectoryInfo(root);
 
-            return dir.EnumerateDirectories("*.Web", SearchOption.AllDirectories).FirstOrDefault();
+            var hostDir = dir.EnumerateDirectories("*.Web", SearchOption.AllDirectories).FirstOrDefault();
+
+            if (hostDir == null)
+            {
+                hostDir = dir.EnumerateDirectories("*.Web.Host", SearchOption.AllDirectories).FirstOrDefault();
+            }
+
+            if (hostDir == null)
+            {
+                hostDir = dir.EnumerateDirectories("*.Web.Unified", SearchOption.AllDirectories).FirstOrDefault();
+            }
+
+            if (hostDir == null)
+            {
+                hostDir = dir.EnumerateDirectories("*.HttpApi.Host", SearchOption.AllDirectories).FirstOrDefault();
+            }
+
+            if (hostDir == null)
+                throw new System.Exception($"The host project not found in '{root}'. ");
+
+            return hostDir;
         }
 
         public static DirectoryInfo GetDomainProjectDirectory(string root)
