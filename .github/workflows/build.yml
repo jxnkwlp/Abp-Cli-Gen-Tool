@@ -1,0 +1,55 @@
+﻿name: build and pack
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v1 
+      with:
+        dotnet-version: 5.0.x
+
+    - name: Install Dotnet Tool
+      run: dotnet tool install -g Passingwind.Git-CI-Tools
+
+    - name: Set environment variables
+      uses: rlespinasse/github-slug-action@3.6.0
+ 
+    - name: Version check and generate
+      run: |
+          gitci release changes --output ./changeslog.md
+          gitci version next --format json --output ./version.json --build-ver "${{env.GITHUB_SHA_SHORT}}" 
+          ls ./
+
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --no-restore -c Release
+      
+    - name: Pack
+      run: dotnet build --no-build --no-restore -c Release /p:Version="${{env.GITCI_NEXT_VERSION}}" -o ./
+
+    - name: Push package
+      run: dotnet pack push ./*.nupkg --skip-duplicate -k ${{secrets.NUGET_TOKEN}}
+
+    - name: Create Release
+      uses: ncipollo/release-action@v1
+      with:
+          tag: v${{env.GITCI_NEXT_VERSION}}
+          artifacts: ./*.nupkg, ./changeslog*
+          bodyFile: ./changeslog.md
+          prerelease: false
+          token: ${{ secrets.GITHUB_TOKEN }}
