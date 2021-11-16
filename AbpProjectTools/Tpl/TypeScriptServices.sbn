@@ -1,7 +1,8 @@
 ﻿/**
-* Generate from swagger json url: {{url}}
-* Total count: {{apis.size}}
-**/
+ * Generate from swagger json url: {{url}}
+ * It is recommended not to modify the document
+ * Total count: {{apis.size}}
+ **/
 // @ts-ignore
 /* eslint-disable */
 import { request } from 'umi';
@@ -25,30 +26,30 @@ import { request } from 'umi';
 end-}}
 
 {{-func out_path_params (params) ~}}
-    {{~ for $item in params ~}}
-        {{ $item.name | camel_case}}: {{renderType $item.type $item.type_name }} {{ for.last ? "":"," -}}
-    {{~end~}}
+{{~ for $item in params ~}}
+    {{ $item.name | camel_case}}: {{renderType $item.type $item.type_name }}{{ for.last ? "":"," -}}
+{{~end~}}
 {{~end~}}
 
 {{-func out_query_params(params) ~}}
-    {{~ for $item in params ~}}
-        {{ $item.name | camel_case}}{{$item.required?"":"?"}}: {{renderType $item.type $item.type_name }}{{$item.required? "":" | undefined"}} {{ for.last ? "":"," }}
-    {{~end~}}
+{{~ for $item in params ~}}
+        {{ $item.name | camel_case}}{{$item.required?"":"?"}}: {{renderType $item.type $item.type_name }}{{$item.required? "":" | undefined"}}{{ for.last ? "":"," }}
+{{~end~}}
 {{~end~}}
 
 {{~ for api in apis ~}}
 
 /**
-*  {{api.summary ?? '*TODO*'}} {{api.method | string.upcase}} {{api.path}}
-*  {{if debug}}{{api|json}}{{end}}
-**/
+ * {{api.summary ?? '*TODO*'}} {{api.method | string.upcase}} {{api.path}}
+ * {{if debug}}{{api|json}}{{end}}
+ **/
 export async function {{api.operation_id | camel_case }}(
 {{~ if api.path_params.size > 0 ~}}
-{{ out_path_params api.path_params ~}},
+{{out_path_params api.path_params ~}},
 {{~end~}}
 {{~ if api.query_params.size > 0 ~}}
     params: {
-{{ out_query_params api.query_params ~}}
+{{out_query_params api.query_params ~}}
     },
 {{~end~}}
 {{~ if api.request_param_schame ~}}
@@ -56,18 +57,18 @@ export async function {{api.operation_id | camel_case }}(
 {{~end~}}
     options?: { [key: string]: any }
 ) {
-  return request<{{api.response_param_schame? ((api.project_name ?? "API.") + api.response_param_schame ): "any"}}>(`{{ api.path | replace "{" "${" }}`, {
-    method: '{{api.method | string.upcase}}',
+    return request<{{api.response_param_schame? ((api.project_name ?? "API.") + api.response_param_schame ): "any"}}>(`{{ api.path | replace "{" "${" }}`, {
+        method: '{{api.method | string.upcase}}',
 {{~if api.query_params.size > 0 ~}}
-    params: params,
+        params: params,
 {{~end~}}
 {{~if api.request_param_schame ~}}
-    data: payload,
+        data: payload,
 {{~end~}}
 {{~if !api.response_param_schame ~}}
-    getResponse: true,
+        getResponse: true,
 {{~end~}}
-    ...(options || {}),
-  });
+        ...(options || {}),
+    });
 }
 {{~ end ~}}

@@ -1,6 +1,7 @@
 ﻿/**
-* Generate from swagger json url: {{url}}
-**/
+ * Generate from swagger json url: {{url}}
+ * It is recommended not to modify the document
+ **/
 // @ts-ignore
 /* eslint-disable */
 import { request } from 'umi';
@@ -36,21 +37,34 @@ end-}}
 {{~end~}}
 
 /**
-*  {{api.summary ?? '*TODO*'}} {{api.method | string.upcase}} {{api.path}}
-*  {{if debug}}{{api|json}}{{end}}
-**/
-export async function {{api.operation_id}}(
-    {{ if api.path_params.size > 0 }}{{- out_path_params api.path_params}},{{end}}
-    {{ if api.query_params.size > 0 }}params:{
-        {{- out_query_params api.query_params }}
-    },{{end}}
-    {{ if api.request_param_schame ~}}payload: (api.project_name ?? "API."){{api.request_param_schame}},{{~end}}
+ * {{api.summary ?? '*TODO*'}} {{api.method | string.upcase}} {{api.path}}
+ * {{if debug}}{{api|json}}{{end}}
+ **/
+export async function {{api.operation_id | camel_case }}(
+{{~ if api.path_params.size > 0 ~}}
+{{out_path_params api.path_params ~}},
+{{~end~}}
+{{~ if api.query_params.size > 0 ~}}
+    params: {
+{{out_query_params api.query_params ~}}
+    },
+{{~end~}}
+{{~ if api.request_param_schame ~}}
+    payload: {{api.project_name ?? "API."}} {{api.request_param_schame}},
+{{~end~}}
     options?: { [key: string]: any }
 ) {
-  return request<{{api.response_param_schame? ((api.project_name ?? "API.") + api.response_param_schame ): "any"}}>(`{{ api.path | replace "{" "${" }}`, {
-    method: '{{api.method | string.upcase}}',
-    {{~if api.query_params.size > 0 ~}} params: params, {{~end~}}
-    {{~if api.request_param_schame ~}} data: payload, {{~end~}}
-    ...(options || {}),
-  });
+    return request<{{api.response_param_schame? ((api.project_name ?? "API.") + api.response_param_schame ): "any"}}>(`{{ api.path | replace "{" "${" }}`, {
+        method: '{{api.method | string.upcase}}',
+{{~if api.query_params.size > 0 ~}}
+        params: params,
+{{~end~}}
+{{~if api.request_param_schame ~}}
+        data: payload,
+{{~end~}}
+{{~if !api.response_param_schame ~}}
+        getResponse: true,
+{{~end~}}
+        ...(options || {}),
+    });
 }
