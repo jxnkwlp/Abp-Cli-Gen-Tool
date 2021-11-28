@@ -22,7 +22,7 @@ end -}}
 
 {{~ func output_params (params) ~}}
     {{~ for $item in params ~}}
-        {{ $item.name}}{{$item.required?"":"?"}}: {{ renderType $item.type $item.type_name }}{{$item.required?"":" | undefined"}} {{for.last?"":","}}
+        {{ $item.name}}{{$item.required?"":"?"}}: {{ renderType $item.type $item.type_name }}{{$item.required?"":" | undefined"}};
     {{~ end ~}}
 {{~ end ~}}
 
