@@ -4,7 +4,11 @@
  **/
 // @ts-ignore
 /* eslint-disable */
+{{~if request_import~}}
+{{request_import}}
+{{~else~}}
 import { request } from 'umi';
+{{~end~}}
 
 {{-func renderType(type, name)
     if type == 1
@@ -24,16 +28,16 @@ import { request } from 'umi';
     end
 end-}}
 
-{{-func out_path_params (params) ~}}
-    {{~ for $item in  params ~}}
-        {{ $item.name | camel_case}}: {{renderType $item.type $item.type_name }} {{~ for.last?"":"," ~}}
-    {{~end~}}
+{{~func out_path_params (params) ~}}
+{{~ for $item in params ~}}
+    {{ $item.name | camel_case}}: {{renderType $item.type $item.type_name }}{{ for.last ? "":"," -}}
+{{~end~}}
 {{~end~}}
 
-{{-func out_query_params(params) ~}}
-    {{~ for $item in  params}}
-        {{ $item.name | camel_case}}: {{renderType $item.type $item.type_name }} {{~ for.last?"":"," ~}}
-    {{~end~}}
+{{~func out_query_params(params) ~}}
+{{~ for $item in params ~}}
+        {{ $item.name | camel_case}}{{$item.required?"":"?"}}: {{renderType $item.type $item.type_name }}{{$item.required? "":" | undefined"}}{{ for.last ? "":"," }}
+{{~end~}}
 {{~end~}}
 
 /**

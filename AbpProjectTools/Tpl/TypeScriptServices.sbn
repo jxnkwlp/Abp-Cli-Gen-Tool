@@ -5,7 +5,11 @@
  **/
 // @ts-ignore
 /* eslint-disable */
+{{~if request_import~}}
+{{request_import}}
+{{~else~}}
 import { request } from 'umi';
+{{~end~}}
 
 {{-func renderType(type, name)
     if type == 1
@@ -71,4 +75,5 @@ export async function {{api.operation_id | camel_case }}(
         ...(options || {}),
     });
 }
+
 {{~ end ~}}
