@@ -32,26 +32,12 @@ namespace AbpProjectTools.Services
                     .Operation
                     .ActualParameters
                     .Where(x => x.Kind == OpenApiParameterKind.Path)
-                    .Select(x => new ApiParamItem
-                    {
-                        Name = x.Name,
-                        Type = GetItemType(x.Schema.Type),
-                        Description = x.Description,
-                        Required = x.IsRequired,
-                        Nullable = !x.IsRequired,
-                    });
+                    .Select(x => GetParamItem(x));
                 var queryParams = item
                     .Operation
                     .ActualParameters
                     .Where(x => x.Kind == OpenApiParameterKind.Query)
-                    .Select(x => new ApiParamItem
-                    {
-                        Name = x.Name,
-                        Type = GetItemType(x.Schema.Type),
-                        Description = x.Description,
-                        Required = x.IsRequired,
-                        Nullable = !x.IsRequired,
-                    });
+                    .Select(x => GetParamItem(x));
 
                 var apiItem = new ApiDefinition()
                 {
@@ -200,6 +186,44 @@ namespace AbpProjectTools.Services
 
                 default: return ApiParamType.Unknow;
             }
+        }
+
+        private static ApiParamItem GetParamItem(OpenApiParameter item)
+        {
+            var itemType = GetItemType(item.Schema.Type);
+            string typeName = null;
+
+            if (itemType == ApiParamType.Array)
+            {
+                var arrayItem = item.ActualTypeSchema.Item;
+                if (arrayItem.HasReference)
+                {
+                    typeName = arrayItem.Reference.Title;
+                }
+                else if (arrayItem.Type == JsonObjectType.None)
+                {
+                    typeName = arrayItem.Title;
+                }
+                else
+                {
+                    var arrayItemType = GetItemType(arrayItem.Type);
+                    typeName = arrayItemType.ToString().ToLowerInvariant();
+                }
+            }
+            else
+            {
+                typeName = itemType.ToString().ToLowerInvariant();
+            }
+
+            return new ApiParamItem
+            {
+                Name = item.Name,
+                Type = itemType,
+                TypeName = typeName,
+                Description = item.Description,
+                Required = item.IsRequired,
+                Nullable = !item.IsRequired,
+            };
         }
     }
 }
