@@ -15,4 +15,5 @@ namespace {{type_namespace}}
         Task<List<{{type_name}}>> GetPagedListAsync(int skipCount, int maxResultCount, string filter, string sorting, bool includeDetails = false, CancellationToken cancellationToken = default);
 
     }
+
 }

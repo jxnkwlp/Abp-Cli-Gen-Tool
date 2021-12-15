@@ -19,14 +19,18 @@ namespace {{ef.type_namespace}}.Repositories
 
         public async Task<long> GetCountAsync(string filter, CancellationToken cancellationToken = default)
         {
-            return await this
-                //.WhereIf(!string.IsNullOrEmpty(filter), TODO )
+            var dbset = await GetDbSetAsync();
+            return await dbset
+                // TODO
+                //.WhereIf(!string.IsNullOrEmpty(filter),  )
                 .LongCountAsync(cancellationToken);
         }
 
         public async Task<List<{{domain.type_name}}>> GetListAsync(string filter, bool includeDetails = false, CancellationToken cancellationToken = default)
         {
-            return await this
+            var dbset = await GetDbSetAsync();
+            return await dbset
+                // TODO
                 //.IncludeIf(includeDetails, TODO )
                 //.WhereIf(!string.IsNullOrEmpty(filter), TODO )
                 .ToListAsync(cancellationToken);
@@ -34,7 +38,9 @@ namespace {{ef.type_namespace}}.Repositories
 
         public async Task<List<{{domain.type_name}}>> GetPagedListAsync(int skipCount, int maxResultCount, string filter, string sorting, bool includeDetails = false, CancellationToken cancellationToken = default)
         {
-            return await this
+            var dbset = await GetDbSetAsync();
+            return await dbset
+                // TODO
                 //.IncludeIf(includeDetails, TODO )
                 //.WhereIf(!string.IsNullOrEmpty(filter), TODO )
                 .PageBy(skipCount, maxResultCount)
