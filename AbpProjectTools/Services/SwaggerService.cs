@@ -122,7 +122,9 @@ namespace AbpProjectTools.Services
                             Type = GetItemType(prop.Value.Type),
                             // TypeName = prop.Value.HasReference ? prop.Value.Reference.Title : (prop.Value.Type == JsonObjectType.Array ? GetItemType(prop.Value.Item.Type).ToString() : null),
                             Description = prop.Value.Description,
-                            Required = prop.Value.IsNullableRaw == true ? false : true,
+                            Required = prop.Value.IsRequired, //.IsNullableRaw == true ? false : true,
+                            Nullable = !prop.Value.IsRequired,
+                            Format = prop.Value.Format,
                         };
 
                         if (prop.Value.HasReference)
@@ -223,6 +225,7 @@ namespace AbpProjectTools.Services
                 Description = item.Description,
                 Required = item.IsRequired,
                 Nullable = !item.IsRequired,
+                Format = item.Format,
             };
         }
     }
