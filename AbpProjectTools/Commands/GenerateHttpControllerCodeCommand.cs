@@ -86,6 +86,7 @@ namespace AbpProjectTools.Commands
                         .Name
                         .Replace("GetListWith", null)
                         .Replace("GetList", null)
+                        .Replace("List", null)
                         .Replace("GetWith", null)
                         .Replace("Get", null)
                         .Replace("Load", null);
