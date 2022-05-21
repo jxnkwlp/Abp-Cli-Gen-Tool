@@ -22,7 +22,7 @@ import { request } from 'umi';
     else if type == 5
         ret  name + "[]"
     else if type == 6
-        ret name ? name: 'object'
+        ret name ? name: 'any'
     else
         ret "any"
     end
