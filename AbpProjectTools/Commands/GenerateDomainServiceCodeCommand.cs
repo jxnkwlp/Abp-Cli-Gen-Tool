@@ -11,33 +11,34 @@ namespace AbpProjectTools.Commands
     {
         public override Command GetCommand()
         {
-            var command = new Command("domain-service","Generate an empty domain service code");
-
-            command.Handler = CommandHandler.Create<BackendCodeGeneratorCommonCommandOption>(options =>
+            var command = new Command("domain-service", "Generate an empty domain service code")
             {
-                var typeService = new TypeService(options.SluDir);
-
-                var templateService = new TemplateService(options.Template);
-
-                try
+                Handler = CommandHandler.Create<BackendCodeGeneratorCommonCommandOption>(options =>
                 {
-                    Console.WriteLine($"🚗 Staring generate domain '{options.Name}' service code ...");
+                    var typeService = new TypeService(options.SluDir);
 
-                    var domainInfo = typeService.GetDomain(options.Name);
+                    var templateService = new TemplateService(options.Template);
 
-                    var fileContent = templateService.Render("DomainService", domainInfo);
+                    try
+                    {
+                        Console.WriteLine($"🚗 Staring generate domain '{options.Name}' service code ...");
 
-                    var filePath = Path.Combine(domainInfo.FileDirectory, $"{domainInfo.TypeName}Manager.cs");
+                        var domainInfo = typeService.GetDomain(options.Name);
 
-                    WriteFileContent(filePath, fileContent, options.Overwrite);
+                        var fileContent = templateService.Render("DomainService", domainInfo);
 
-                    Console.WriteLine("🎉 Done. ");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message.Pastel(Color.Red));
-                }
-            });
+                        var filePath = Path.Combine(domainInfo.FileDirectory, $"{domainInfo.TypeName}Manager.cs");
+
+                        WriteFileContent(filePath, fileContent, options.Overwrite);
+
+                        Console.WriteLine("🎉 Done. ");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message.Pastel(Color.Red));
+                    }
+                })
+            };
 
             return command;
         }

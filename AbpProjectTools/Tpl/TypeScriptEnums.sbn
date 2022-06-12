@@ -1,13 +1,13 @@
 ﻿/**
  * Generate from swagger json url: {{url}} 
  **/
-/**
- * enum types
-* */
+//
+// enum types
+//
 {{~ for type in schames ~}}
     {{~if type.enumerable ~}}
 /**
- *  {{type.description ?? "*TODO*"}}
+ * {{type.description ?? "*TODO*"}}
  **/
 {{~ if type.enum_names ~}}
 export enum {{type.name}} {

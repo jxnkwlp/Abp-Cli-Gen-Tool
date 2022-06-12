@@ -9,5 +9,6 @@
         public string Format { get; set; }
         public bool Required { get; set; }
         public bool Nullable { get; set; }
+        public bool Enumerable { get; set; }
     }
 }

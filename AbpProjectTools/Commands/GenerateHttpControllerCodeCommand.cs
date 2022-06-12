@@ -13,7 +13,7 @@ namespace AbpProjectTools.Commands
     {
         public override Command GetCommand()
         {
-            var command = new Command("http-controller","Generate http controller code from app service")
+            var command = new Command("http-controller", "Generate http controller code from app service")
             {
                 Handler = CommandHandler.Create<BackendCodeGeneratorCommonCommandOption>(options =>
                 {

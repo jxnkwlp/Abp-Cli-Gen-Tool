@@ -19,8 +19,6 @@ namespace AbpProjectTools.Commands
             command.AddOption(new Option<string>("--templates", ""));
             command.AddOption(new Option<string>("--project-name", ""));
             command.AddOption(new Option<bool>("--debug", ""));
-            command.AddOption(new Option<bool>("--split-service", () => true));
-            //command.AddOption(new Option<bool>("--split-type", ""));
             command.AddOption(new Option<string[]>("--tags", ""));
             command.AddOption(new Option<string>("--request-import", ""));
 
@@ -42,49 +40,33 @@ namespace AbpProjectTools.Commands
                 if (!string.IsNullOrWhiteSpace(options.ProjectName))
                     outputPath = Path.Combine(options.Output, options.ProjectName);
 
-                if (options.SplitService)
+                // service
+                foreach (var item in apiInfo.Apis.GroupBy(x => x.Tags[0]))
                 {
-                    foreach (var item in apiInfo.Apis.GroupBy(x => x.Tags[0]))
+                    if (options.Tags?.Any() == true && !options.Tags.Contains(item.Key))
                     {
-                        if (options.Tags?.Any() == true && !options.Tags.Contains(item.Key))
-                        {
-                            continue;
-                        }
-
-                        var name = item.Key;
-                        var apiList = item.ToList();
-
-                        var fileContent = templateService.Render("TypeScriptServices", new
-                        {
-                            projectName = options.ProjectName,
-                            Name = name,
-                            Apis = apiList,
-                            Count = apiList.Count(),
-                            Url = options.SwaggerUrl,
-                            Debug = options.Debug,
-                            ProjectName = options.ProjectName,
-                            RequestImport = options.RequestImport,
-                        });
-
-                        WriteFileContent(Path.Combine(outputPath, $"{name}.ts"), fileContent, true);
+                        continue;
                     }
-                }
-                else
-                {
-                    var fileContent = templateService.Render("TypeScriptService", new
+
+                    var name = item.Key;
+                    var apiList = item.OrderBy(x => x.OperationId).ToList();
+
+                    var fileContent = templateService.Render("TypeScriptServices", new
                     {
                         projectName = options.ProjectName,
-                        Apis = apiInfo.Apis.ToList(),
-                        Count = apiInfo.Apis.Count,
+                        Name = name,
+                        Apis = apiList,
+                        Count = apiList.Count(),
                         Url = options.SwaggerUrl,
                         Debug = options.Debug,
                         ProjectName = options.ProjectName,
                         RequestImport = options.RequestImport,
                     });
 
-                    WriteFileContent(Path.Combine(outputPath, "services.ts"), fileContent, true);
+                    WriteFileContent(Path.Combine(outputPath, $"{name}.ts"), fileContent, true);
                 }
 
+                // types
                 var fileContent2 = templateService.Render("TypeScriptTypes", new
                 {
                     projectName = options.ProjectName,
@@ -93,14 +75,16 @@ namespace AbpProjectTools.Commands
                     Url = options.SwaggerUrl,
                     Debug = options.Debug,
                     ProjectName = options.ProjectName,
+
                 });
 
                 WriteFileContent(Path.Combine(outputPath, "typings.d.ts"), fileContent2, true);
 
+                // enums
                 fileContent2 = templateService.Render("TypeScriptEnums", new
                 {
                     projectName = options.ProjectName,
-                    schames = apiInfo.Schames.ToList(),
+                    schames = apiInfo.Schames.OrderBy(x => x.Name).ToList(),
                     Count = apiInfo.Schames.Count,
                     Url = options.SwaggerUrl,
                     Debug = options.Debug,
@@ -126,10 +110,6 @@ namespace AbpProjectTools.Commands
         public string[] Tags { get; set; }
 
         public bool Debug { get; set; }
-
-        public bool SplitType { get; set; }
-
-        public bool SplitService { get; set; } = true;
 
         public string RequestImport { get; set; }
     }

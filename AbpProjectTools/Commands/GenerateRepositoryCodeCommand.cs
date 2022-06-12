@@ -11,42 +11,43 @@ namespace AbpProjectTools.Commands
     {
         public override Command GetCommand()
         {
-            var command = new Command("repository","Generate an domain repository (include efcore repository)");
-
-            command.Handler = CommandHandler.Create<BackendCodeGeneratorCommonCommandOption>(options =>
+            var command = new Command("repository", "Generate an domain repository (include efcore repository)")
             {
-                var typeService = new TypeService(options.SluDir);
-
-                var templateService = new TemplateService(options.Template);
-
-                try
+                Handler = CommandHandler.Create<BackendCodeGeneratorCommonCommandOption>(options =>
                 {
-                    Console.WriteLine($"🚗 Staring generate domain '{options.Name}' repository code ..");
+                    var typeService = new TypeService(options.SluDir);
 
-                    var domainInfo = typeService.GetDomain(options.Name);
-                    var efInfo = typeService.GetEfCore();
+                    var templateService = new TemplateService(options.Template);
 
-                    // file 1
-                    var fileContent = templateService.Render("DomainRepository", domainInfo);
-                    var filePath = Path.Combine(domainInfo.FileDirectory, $"I{domainInfo.TypeName}Repository.cs");
+                    try
+                    {
+                        Console.WriteLine($"🚗 Staring generate domain '{options.Name}' repository code ..");
 
-                    WriteFileContent(filePath, fileContent, options.Overwrite);
+                        var domainInfo = typeService.GetDomain(options.Name);
+                        var efInfo = typeService.GetEfCore();
+
+                        // file 1
+                        var fileContent = templateService.Render("DomainRepository", domainInfo);
+                        var filePath = Path.Combine(domainInfo.FileDirectory, $"I{domainInfo.TypeName}Repository.cs");
+
+                        WriteFileContent(filePath, fileContent, options.Overwrite);
 
 
-                    // file 2 
-                    fileContent = templateService.Render("EfCoreRepository", new { domain = domainInfo, ef = efInfo });
-                    filePath = Path.Combine(efInfo.FileDirectoryName, "Repositories", $"{domainInfo.TypeName}Repository.cs");
+                        // file 2 
+                        fileContent = templateService.Render("EfCoreRepository", new { domain = domainInfo, ef = efInfo });
+                        filePath = Path.Combine(efInfo.FileDirectoryName, "Repositories", $"{domainInfo.TypeName}Repository.cs");
 
-                    WriteFileContent(filePath, fileContent, options.Overwrite);
+                        WriteFileContent(filePath, fileContent, options.Overwrite);
 
-                    Console.WriteLine("🎉 Done. ");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine(ex.Message.Pastel(Color.Red));
-                    throw;
-                }
-            });
+                        Console.WriteLine("🎉 Done. ");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message.Pastel(Color.Red));
+                        throw;
+                    }
+                })
+            };
 
             return command;
         }

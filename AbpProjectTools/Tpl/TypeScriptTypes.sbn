@@ -2,6 +2,8 @@
  * Generate from swagger json url: {{url}}
  * Total count: {{schames.size}}
  **/
+import * as Enum from "./enums";
+
 {{- func renderType(type,name)
     if type == 1
         ret "string"
@@ -15,14 +17,16 @@
         ret  name + "[]"
     else if type == 6
         ret name ? name: 'any'
+    else if type == 7
+        ret name ? 'Record<any, '+name+'>': 'any'
     else
         ret "any"
     end
-end -}}
+end ~}}
 
 {{~ func output_params (params) ~}}
     {{~ for $item in params ~}}
-        {{ $item.name}}{{$item.required?"":"?"}}: {{ renderType $item.type $item.type_name }}{{$item.required?"":" | undefined"}};
+        {{ $item.name}}{{$item.required?"":"?"}}: {{$item.enumerable?"Enum."+$item.type_name:renderType $item.type $item.type_name}}{{$item.required?"":" | undefined"}};
     {{~ end ~}}
 {{~ end ~}}
 
@@ -30,7 +34,7 @@ declare namespace {{project_name ?? "API"}} {
 {{~ for type in schames ~}}
     {{~if !type.enumerable ~}}
     /**
-     *  {{type.description ?? "*TODO*"}}
+     * {{type.description ?? "*TODO*"}}
      **/
     type {{type.name}} = {
 {{~ output_params type.params ~}}

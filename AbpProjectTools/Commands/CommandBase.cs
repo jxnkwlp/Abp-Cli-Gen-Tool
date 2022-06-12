@@ -3,6 +3,7 @@ using System.CommandLine;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Pastel;
 
 namespace AbpProjectTools.Commands
@@ -30,7 +31,7 @@ namespace AbpProjectTools.Commands
             }
             else
             {
-                File.WriteAllText(filePath, content);
+                File.WriteAllText(filePath, content, Encoding.UTF8);
                 Console.WriteLine($"⬇️ Write file '{filePath}' successful.".Pastel(Color.Green));
             }
         }

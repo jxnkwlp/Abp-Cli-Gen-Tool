@@ -37,7 +37,7 @@ namespace AbpProjectTools.Commands
             return command;
         }
 
-        static string GetDefaultSolutionName()
+        private static string GetDefaultSolutionName()
         {
             var slnFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.sln", SearchOption.TopDirectoryOnly);
 

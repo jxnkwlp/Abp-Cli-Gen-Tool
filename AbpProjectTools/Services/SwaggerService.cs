@@ -114,62 +114,26 @@ namespace AbpProjectTools.Services
                 }
                 else
                 {
-                    foreach (var prop in item.Value.ActualProperties)
-                    {
-                        var p = new ApiParamItem()
-                        {
-                            Name = prop.Key,
-                            Type = GetItemType(prop.Value.Type),
-                            // TypeName = prop.Value.HasReference ? prop.Value.Reference.Title : (prop.Value.Type == JsonObjectType.Array ? GetItemType(prop.Value.Item.Type).ToString() : null),
-                            Description = prop.Value.Description,
-                            Required = prop.Value.IsRequired, //.IsNullableRaw == true ? false : true,
-                            Nullable = !prop.Value.IsRequired,
-                            Format = prop.Value.Format,
-                        };
-
-                        if (prop.Value.HasReference)
-                        {
-                            p.Type = ApiParamType.Object;
-                            p.TypeName = prop.Value.Reference.Title;
-                        }
-                        else
-                        {
-
-                            //if (prop.Value.IsEnumeration)
-                            //{
-                            //    p.Enumerable = true;
-                            //    p.EnumValues = prop.Value.Enumeration?.ToList();
-                            //    p.EnumNames = prop.Value.EnumerationNames?.ToList();
-                            //}
-
-                            if (p.Type == ApiParamType.Array)
-                            {
-                                var arrayItem = prop.Value.Item;
-                                if (arrayItem.HasReference)
-                                {
-                                    p.TypeName = arrayItem.Reference.Title;
-                                }
-                                else if (arrayItem.Type == JsonObjectType.None)
-                                {
-                                    p.TypeName = arrayItem.Title;
-                                }
-                                else
-                                {
-                                    var arrayItemType = GetItemType(arrayItem.Type);
-                                    p.TypeName = arrayItemType.ToString().ToLowerInvariant();
-                                }
-                            }
-                            else
-                            {
-                                p.TypeName = p.Type.ToString().ToLowerInvariant();
-                            }
-                        }
-
-                        props.Add(p);
-                    }
+                    LoopActualProperties(item.Value.ActualProperties, props);
                 }
 
                 result.Schames.Add(s);
+            }
+
+            // check eunm types
+            var allEmunTypes = result.Schames.Where(x => x.Enumerable);
+            foreach (var schame in result.Schames)
+            {
+                if (!schame.Enumerable && schame.Params != null)
+                {
+                    foreach (var @param in schame.Params)
+                    {
+                        if (allEmunTypes.Any(x => x.Name == @param.TypeName))
+                        {
+                            param.Enumerable = true;
+                        }
+                    }
+                }
             }
 
             return result;
@@ -190,6 +154,72 @@ namespace AbpProjectTools.Services
             }
         }
 
+        private static void LoopActualProperties(IReadOnlyDictionary<string, JsonSchemaProperty> actualProperties, List<ApiParamItem> result)
+        {
+            foreach (var prop in actualProperties)
+            {
+                var p = new ApiParamItem()
+                {
+                    Name = prop.Key,
+                    Type = GetItemType(prop.Value.Type),
+                    // TypeName = prop.Value.HasReference ? prop.Value.Reference.Title : (prop.Value.Type == JsonObjectType.Array ? GetItemType(prop.Value.Item.Type).ToString() : null),
+                    Description = prop.Value.Description,
+                    Required = prop.Value.IsRequired, //.IsNullableRaw == true ? false : true,
+                    Nullable = !prop.Value.IsRequired,
+                    Format = prop.Value.Format,
+                };
+
+                if (prop.Value.HasReference)
+                {
+                    p.Type = ApiParamType.Object;
+                    p.TypeName = prop.Value.Reference.Title;
+                }
+                else
+                {
+
+                    //if (prop.Value.IsEnumeration)
+                    //{
+                    //    p.Enumerable = true;
+                    //    p.EnumValues = prop.Value.Enumeration?.ToList();
+                    //    p.EnumNames = prop.Value.EnumerationNames?.ToList();
+                    //}
+
+                    if (p.Type == ApiParamType.Array)
+                    {
+                        var arrayItem = prop.Value.Item;
+                        if (arrayItem.HasReference)
+                        {
+                            p.TypeName = arrayItem.Reference.Title;
+                        }
+                        else if (arrayItem.Type == JsonObjectType.None)
+                        {
+                            p.TypeName = arrayItem.Title;
+                        }
+                        else
+                        {
+                            var arrayItemType = GetItemType(arrayItem.Type);
+                            p.TypeName = arrayItemType.ToString().ToLowerInvariant();
+                        }
+                    }
+                    else if (p.Type == ApiParamType.Object)
+                    {
+                        // p.TypeName = "any"; 
+                        if (prop.Value.AdditionalPropertiesSchema != null && prop.Value.AdditionalPropertiesSchema.Reference != null)
+                        {
+                            p.Type = ApiParamType.CompositeObject;
+                            p.TypeName = prop.Value.AdditionalPropertiesSchema.Reference.Title;
+                        }
+                    }
+                    else
+                    {
+                        p.TypeName = p.Type.ToString().ToLowerInvariant();
+                    }
+                }
+
+                result.Add(p);
+            }
+        }
+
         private static ApiParamItem GetParamItem(OpenApiParameter item)
         {
             var itemType = GetItemType(item.Schema.Type);
@@ -206,11 +236,19 @@ namespace AbpProjectTools.Services
                 {
                     typeName = arrayItem.Title;
                 }
+                else if (arrayItem.Type == JsonObjectType.Object)
+                {
+                    typeName = "any";
+                }
                 else
                 {
                     var arrayItemType = GetItemType(arrayItem.Type);
                     typeName = arrayItemType.ToString().ToLowerInvariant();
                 }
+            }
+            else if (itemType == ApiParamType.Object)
+            {
+                typeName = "any";
             }
             else
             {

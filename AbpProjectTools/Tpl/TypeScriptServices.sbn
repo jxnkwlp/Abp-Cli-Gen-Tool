@@ -5,6 +5,7 @@
  **/
 // @ts-ignore
 /* eslint-disable */
+import { API } from "./typings";
 {{~if request_import -}}
 {{~request_import~}}
 {{- else -}}
@@ -24,6 +25,8 @@ import { request } from 'umi';
         ret  name + "[]"
     else if type == 6
         ret name ? name: 'any'
+    else if type == 7
+        ret name ? 'Record<any, '+name+'>': 'any'
     else
         ret "any"
     end
@@ -31,21 +34,26 @@ end-}}
 
 {{-func out_path_params (params) ~}}
 {{~ for $item in params ~}}
-    {{ $item.name | camel_case}}: {{renderType $item.type $item.type_name }}{{ for.last ? "":"," -}}
+    {{ $item.name | camel_case}}: {{$item.enumerable?"Enum."+$item.type_name:renderType $item.type $item.type_name}}{{ for.last ? "":"," -}}
 {{~end~}}
 {{~end~}}
 
 {{-func out_query_params(params) ~}}
 {{~ for $item in params ~}}
-        {{ $item.name | camel_case}}{{$item.required?"":"?"}}: {{renderType $item.type $item.type_name }}{{$item.required? "":" | undefined"}}{{ for.last ? "":"," }}
+        {{ $item.name | camel_case}}{{$item.required?"":"?"}}: {{$item.enumerable?"Enum."+$item.type_name:renderType $item.type $item.type_name}}{{$item.required? "":" | undefined"}}{{ for.last ? "":"," }}
 {{~end~}}
 {{~end~}}
 
 {{~ for api in apis ~}}
 
+{{~if debug~}}
 /**
- * {{api.summary ?? '*TODO*'}} {{api.method | string.upcase}} {{api.path}}
- * {{if debug}}{{api|json}}{{end}}
+ * SOURCE SCHAME
+ * {{api|json}}
+ **/
+{{~end~}}
+/**
+ * {{api.summary ?? '*TODO*'}} {{api.method | string.upcase}} {{api.path}} 
  **/
 export async function {{api.operation_id | camel_case }}(
 {{~ if api.path_params.size > 0 ~}}

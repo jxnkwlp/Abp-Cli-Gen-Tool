@@ -9,5 +9,6 @@
         Boolean,
         Array,
         Object,
+        CompositeObject,
     }
 }
