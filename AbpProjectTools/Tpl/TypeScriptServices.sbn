@@ -5,7 +5,7 @@
  **/
 // @ts-ignore
 /* eslint-disable */
-import { API } from "./typings";
+import type { API } from "./typings";
 {{~if request_import -}}
 {{~request_import~}}
 {{- else -}}
