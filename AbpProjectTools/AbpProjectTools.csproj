@@ -2,21 +2,22 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>abptool</ToolCommandName>
         <PackageId>Passingwind.$(AssemblyName)</PackageId>
-        <Version>0.3.9</Version>
+        <Version>0.4.0</Version>
         <Authors>Passingwind</Authors>
         <Copyright>Passingwind</Copyright>
         <PackageProjectUrl>https://github.com/jxnkwlp/Abp-Cli-Gen-Tool</PackageProjectUrl>
         <RepositoryUrl>https://github.com/jxnkwlp/Abp-Cli-Gen-Tool</RepositoryUrl>
         <PackageTags>abp tool</PackageTags>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Remove="Commands\GenerateDomainAllCodeCommand.cs" />
+        <Compile Remove="Commands\GenerateDomainAllCodeCommand.cs" />
     </ItemGroup>
 
     <ItemGroup>
@@ -38,6 +39,10 @@
         </None>
         <Content Update="Tpl\*.sbn"></Content>
         <Content Update="Tpl\*.txt"></Content>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\README.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
 </Project>
