@@ -169,7 +169,7 @@ namespace AbpProjectTools.Services
                     Format = prop.Value.Format,
                 };
 
-                if (prop.Value.HasReference)
+                if (prop.Value.HasReference && prop.Value.Reference != null)
                 {
                     p.Type = ApiParamType.Object;
                     p.TypeName = prop.Value.Reference.Title;
