@@ -94,7 +94,6 @@ namespace AbpProjectTools.Services
             }
 
 
-
             foreach (var item in document.Definitions)
             {
                 var typeName = item.Value.Title;
@@ -176,14 +175,6 @@ namespace AbpProjectTools.Services
                 }
                 else
                 {
-
-                    //if (prop.Value.IsEnumeration)
-                    //{
-                    //    p.Enumerable = true;
-                    //    p.EnumValues = prop.Value.Enumeration?.ToList();
-                    //    p.EnumNames = prop.Value.EnumerationNames?.ToList();
-                    //}
-
                     if (p.Type == ApiParamType.Array)
                     {
                         var arrayItem = prop.Value.Item;
@@ -201,14 +192,15 @@ namespace AbpProjectTools.Services
                             p.TypeName = arrayItemType.ToString().ToLowerInvariant();
                         }
                     }
-                    else if (p.Type == ApiParamType.Object)
+                    else if (p.Type == ApiParamType.Object && prop.Value.AdditionalPropertiesSchema?.Reference != null)
                     {
-                        // p.TypeName = "any"; 
-                        if (prop.Value.AdditionalPropertiesSchema != null && prop.Value.AdditionalPropertiesSchema.Reference != null)
-                        {
-                            p.Type = ApiParamType.CompositeObject;
-                            p.TypeName = prop.Value.AdditionalPropertiesSchema.Reference.Title;
-                        }
+                        p.Type = ApiParamType.CompositeObject;
+                        p.TypeName = prop.Value.AdditionalPropertiesSchema.Reference.Title;
+                    }
+                    else if (prop.Value.ActualTypeSchema != null && prop.Value.HasOneOfSchemaReference)
+                    {
+                        p.Type = ApiParamType.Object;
+                        p.TypeName = prop.Value.ActualTypeSchema.Title;
                     }
                     else
                     {
