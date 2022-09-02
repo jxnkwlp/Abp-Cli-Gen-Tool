@@ -1,13 +1,15 @@
 # DotNet Cli 工具
 
-一个简单的Abp代码生成工具。 
+一个简单的Abp代码辅助生成工具。 
+
+[![NuGet](https://img.shields.io/nuget/v/Passingwind.AbpProjectTools?style=flat-square)](https://www.nuget.org/packages/Passingwind.AbpProjectTools)
 
 ####  一键生成实体的 
 - repository
 - app service 
 - http controller (从 app service 生成)
-- typescript types (基于 swagger api)
-- typescript service (基于 swagger api)
+- typescript types (基于 openapi)
+- typescript service (基于 openapi)
 
 ## 如何使用
 
@@ -53,5 +55,5 @@ Options:
   -?, -h, --help  Show help and usage information
 
 Commands:
-  ts                                        生成 typescript 的相关文件（types和service），基于 swagger 。
+  ts                                        生成后端 api 对应的 typescript 的相关文件（types和service），基于 openapi 。
 ``` 
