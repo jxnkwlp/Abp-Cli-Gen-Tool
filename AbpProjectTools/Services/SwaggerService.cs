@@ -9,6 +9,8 @@ namespace AbpProjectTools.Services
 {
     public class SwaggerService
     {
+        private static readonly string[] _ignoreTypeNames = new string[] { "Assembly", "ConstructorInfo", "CustomAttributeData", "CustomAttributeNamedArgument", "CustomAttributeTypedArgument", "EventInfo", "FieldInfo", "ICustomAttributeProvider", "IntPtr", "MemberInfo", "MethodBase", "MethodInfo", "Module", "ModuleHandle", "ParameterInfo", "PropertyInfo", "RuntimeFieldHandle", "RuntimeMethodHandle", "RuntimeTypeHandle", "Type", "TypeInfo", "TypeAttribute", "StructLayoutAttribute" };
+
         public async Task<SwaggerApiInfoModel> LoadAsync(string url)
         {
             var result = new SwaggerApiInfoModel();
@@ -98,6 +100,9 @@ namespace AbpProjectTools.Services
             {
                 var typeName = item.Value.Title;
                 var props = new List<ApiParamItem>();
+
+                if (_ignoreTypeNames.Contains(typeName))
+                    continue;
 
                 var s = new ApiSchameDefinition()
                 {
@@ -194,8 +199,11 @@ namespace AbpProjectTools.Services
                     }
                     else if (p.Type == ApiParamType.Object && prop.Value.AdditionalPropertiesSchema?.Reference != null)
                     {
-                        p.Type = ApiParamType.CompositeObject;
-                        p.TypeName = prop.Value.AdditionalPropertiesSchema.Reference.Title;
+                        if (prop.Value.AdditionalPropertiesSchema != null && prop.Value.AdditionalPropertiesSchema.Reference != null)
+                        {
+                            p.Type = ApiParamType.CompositeObject;
+                            p.TypeName = prop.Value.AdditionalPropertiesSchema.Reference.Title;
+                        }
                     }
                     else if (prop.Value.ActualTypeSchema != null && prop.Value.HasOneOfSchemaReference)
                     {
@@ -204,8 +212,20 @@ namespace AbpProjectTools.Services
                     }
                     else
                     {
-                        p.TypeName = p.Type.ToString().ToLowerInvariant();
+                        if (p.TypeName == "JObject")
+                        {
+                            p.TypeName = "any";
+                        }
+                        else if (p.TypeName == "JArray")
+                        {
+                            p.TypeName = "any[]";
+                        }
                     }
+                }
+
+                if (_ignoreTypeNames.Contains(p.TypeName))
+                {
+                    p.TypeName = "any";
                 }
 
                 result.Add(p);
