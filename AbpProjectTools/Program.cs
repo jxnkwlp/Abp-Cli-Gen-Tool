@@ -5,26 +5,25 @@ using System.Text;
 using System.Threading.Tasks;
 using AbpProjectTools.Commands;
 
-namespace AbpProjectTools
+namespace AbpProjectTools;
+
+internal static class Program
 {
-    internal static class Program
+    private static async Task<int> Main(string[] args)
     {
-        private static async Task<int> Main(string[] args)
+        Console.OutputEncoding = Encoding.UTF8;
+
+        Console.WriteLine($"🚩 Current Directory: {Directory.GetCurrentDirectory()}");
+        // Console.WriteLine($"App Directory: {AppContext.BaseDirectory}");
+
+        var rootCommand = new RootCommand()
         {
-            Console.OutputEncoding = Encoding.UTF8;
+            Description = "Abp project tools",
+            Name = "abptool",
+        };
 
-            Console.WriteLine($"🚩 Current Directory: {Directory.GetCurrentDirectory()}");
-            // Console.WriteLine($"App Directory: {AppContext.BaseDirectory}");
+        rootCommand.AddCommand(new CodeGeneratorCommand().GetCommand());
 
-            var rootCommand = new RootCommand()
-            {
-                Description = "Abp project tools",
-                Name = "abptool",
-            };
-
-            rootCommand.AddCommand(new CodeGeneratorCommand().GetCommand());
-
-            return await rootCommand.InvokeAsync(args);
-        }
+        return await rootCommand.InvokeAsync(args);
     }
 }

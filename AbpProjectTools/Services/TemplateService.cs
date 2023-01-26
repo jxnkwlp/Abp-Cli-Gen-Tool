@@ -8,134 +8,129 @@ using Pluralize.NET;
 using Scriban;
 using Scriban.Runtime;
 
-namespace AbpProjectTools
+namespace AbpProjectTools.Services;
+
+public class TemplateService
 {
-    public class TemplateService
+    private readonly string _tempateDir;
+
+    public TemplateService(string tempateDir = null)
     {
-        private readonly string _tempateDir;
+        _tempateDir = tempateDir;
+    }
 
-        public TemplateService(string tempateDir = null)
+    private static string GetBaseDirectory()
+    {
+        return AppContext.BaseDirectory;
+    }
+
+    public static string GetFileContent(string fileName, string searchDirectory = null)
+    {
+        if (!string.IsNullOrEmpty(searchDirectory) && Directory.Exists(searchDirectory))
         {
-            _tempateDir = tempateDir;
+            var filePath = Path.Combine(searchDirectory, $"{fileName}.sbn");
+            if (File.Exists(filePath))
+                return File.ReadAllText(filePath);
+        }
+        else
+        {
+            var filePath = Path.Combine(GetBaseDirectory(), $"./Tpl/{fileName}.sbn");
+            if (File.Exists(filePath))
+                return File.ReadAllText(filePath);
         }
 
-        private static string GetBaseDirectory()
-        {
-            return AppContext.BaseDirectory;
-        }
+        throw new Exception($"The template file '{fileName}' not found.");
+    }
 
-        public static string GetFileContent(string fileName, string searchDirectory = null)
+    public string Render(string fileName, object data = null)
+    {
+        var content = GetFileContent(fileName, _tempateDir);
+
+        var scriptObject1 = new ScriptObject();
+        scriptObject1.Import(typeof(RenderHelperFunctions));
+        scriptObject1.Import(data);
+
+        var context = new TemplateContext();
+        context.PushGlobal(scriptObject1);
+
+        var template = Template.Parse(content);
+        if (template.HasErrors)
         {
-            if (!string.IsNullOrEmpty(searchDirectory) && Directory.Exists(searchDirectory))
+            var msg = template.Messages[0];
+            throw new AggregateException(template.Messages.Select(x => new Exception(x.ToString())));
+        }
+        return template.Render(context);
+    }
+
+}
+
+public static class RenderHelperFunctions
+{
+    public static string Json(object value)
+    {
+        var settings = new JsonSerializerSettings()
+        {
+            ContractResolver = new CamelCasePropertyNamesContractResolver()
             {
-                var filePath = Path.Combine(searchDirectory, $"{fileName}.sbn");
-                if (File.Exists(filePath))
-                {
-                    return File.ReadAllText(filePath);
-                }
+                NamingStrategy = new SnakeCaseNamingStrategy(),
+            },
+        };
+
+        return JsonConvert.SerializeObject(value, settings);
+    }
+
+    public static string Replace(string source, string match, string replaceTo)
+    {
+        return source.Replace(match, replaceTo);
+    }
+
+    public static string CamelCase(string source)
+    {
+        if (source == null)
+            return source;
+
+        return source[0].ToString().ToLower() + source.Substring(1);
+    }
+
+    public static string ToSlugString(string source)
+    {
+        if (source == null)
+            return source;
+
+        StringBuilder sb = new StringBuilder();
+
+        foreach (var item in source)
+        {
+            if (char.IsUpper(item))
+            {
+                if (sb.Length > 0)
+                    sb.Append('-').Append(char.ToLower(item));
+                else
+                    sb.Append(char.ToLower(item));
             }
             else
             {
-                var filePath = Path.Combine(GetBaseDirectory(), $"./Tpl/{fileName}.sbn");
-                if (File.Exists(filePath))
-                {
-                    return File.ReadAllText(filePath);
-                }
+                sb.Append(item);
             }
-
-            throw new System.Exception($"The template file '{fileName}' not found.");
         }
 
-        public string Render(string fileName, object data = null)
-        {
-            var content = GetFileContent(fileName, _tempateDir);
-
-            var scriptObject1 = new ScriptObject();
-            scriptObject1.Import(typeof(RenderHelperFunctions));
-            scriptObject1.Import(data);
-
-            var context = new TemplateContext();
-            context.PushGlobal(scriptObject1);
-
-            var template = Template.Parse(content);
-            if (template.HasErrors)
-            {
-                var msg = template.Messages[0];
-                throw new AggregateException(template.Messages.Select(x => new Exception(x.ToString())));
-            }
-            return template.Render(context);
-        }
-
+        return sb.ToString();
     }
 
-    public static class RenderHelperFunctions
+    public static string ToPluralize(string source)
     {
-        public static string Json(object value)
-        {
-            var settings = new JsonSerializerSettings()
-            {
-                ContractResolver = new CamelCasePropertyNamesContractResolver()
-                {
-                    NamingStrategy = new SnakeCaseNamingStrategy(),
-                },
-            };
+        if (source == null)
+            return source;
 
-            return JsonConvert.SerializeObject(value, settings);
-        }
-
-        public static string Replace(string source, string match, string replaceTo)
-        {
-            return source.Replace(match, replaceTo);
-        }
-
-        public static string CamelCase(string source)
-        {
-            if (source == null)
-                return source;
-
-            return source[0].ToString().ToLower() + source.Substring(1);
-        }
-
-        public static string ToSlugString(string source)
-        {
-            if (source == null)
-                return source;
-
-            StringBuilder sb = new StringBuilder();
-
-            foreach (var item in source)
-            {
-                if (char.IsUpper(item))
-                {
-                    if (sb.Length > 0)
-                        sb.Append('-').Append(char.ToLower(item));
-                    else
-                        sb.Append(char.ToLower(item));
-                }
-                else
-                {
-                    sb.Append(item);
-                }
-            }
-
-            return sb.ToString();
-        }
-
-        public static string ToPluralize(string source)
-        {
-            if (source == null)
-                return source;
-
-            return new Pluralizer().Pluralize(source);
-        }
-
-        public static string ToSingularize(string source)
-        {
-            if (source == null)
-                return source;
-
-            return new Pluralizer().Singularize(source);
-        }
-
+        return new Pluralizer().Pluralize(source);
     }
+
+    public static string ToSingularize(string source)
+    {
+        if (source == null)
+            return source;
+
+        return new Pluralizer().Singularize(source);
+    }
+
 }

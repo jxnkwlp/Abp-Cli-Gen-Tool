@@ -3,44 +3,44 @@ using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Drawing;
 using System.IO;
+using AbpProjectTools.Services;
 using Pastel;
 
-namespace AbpProjectTools.Commands
+namespace AbpProjectTools.Commands;
+
+public class GenerateDomainServiceCodeCommand : CommandBase
 {
-    public class GenerateDomainServiceCodeCommand : CommandBase
+    public override Command GetCommand()
     {
-        public override Command GetCommand()
+        var command = new Command("domain-service", "Generate an empty domain service code")
         {
-            var command = new Command("domain-service", "Generate an empty domain service code")
+            Handler = CommandHandler.Create<BackendCodeGeneratorCommonCommandOption>(options =>
             {
-                Handler = CommandHandler.Create<BackendCodeGeneratorCommonCommandOption>(options =>
+                var typeService = new TypeService(options.SluDir);
+
+                var templateService = new TemplateService(options.Template);
+
+                try
                 {
-                    var typeService = new TypeService(options.SluDir);
+                    Console.WriteLine($"🚗 Staring generate domain '{options.Name}' service code ...");
 
-                    var templateService = new TemplateService(options.Template);
+                    var domainInfo = typeService.GetDomain(options.Name);
 
-                    try
-                    {
-                        Console.WriteLine($"🚗 Staring generate domain '{options.Name}' service code ...");
+                    var fileContent = templateService.Render("DomainService", domainInfo);
 
-                        var domainInfo = typeService.GetDomain(options.Name);
+                    var filePath = Path.Combine(domainInfo.FileDirectory, $"{domainInfo.TypeName}Manager.cs");
 
-                        var fileContent = templateService.Render("DomainService", domainInfo);
+                    WriteFileContent(filePath, fileContent, options.Overwrite);
 
-                        var filePath = Path.Combine(domainInfo.FileDirectory, $"{domainInfo.TypeName}Manager.cs");
+                    Console.WriteLine("🎉 Done. ");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message.Pastel(Color.Red));
+                }
+            })
+        };
 
-                        WriteFileContent(filePath, fileContent, options.Overwrite);
-
-                        Console.WriteLine("🎉 Done. ");
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message.Pastel(Color.Red));
-                    }
-                })
-            };
-
-            return command;
-        }
+        return command;
     }
 }

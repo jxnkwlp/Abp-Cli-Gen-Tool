@@ -1,9 +1,8 @@
 ﻿using System.CommandLine;
 
-namespace AbpProjectTools
+namespace AbpProjectTools;
+
+public interface ICmdCommand
 {
-    public interface ICmdCommand
-    {
-        Command GetCommand();
-    }
+    Command GetCommand();
 }

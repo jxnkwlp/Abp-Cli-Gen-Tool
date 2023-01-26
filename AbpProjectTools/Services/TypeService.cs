@@ -9,7 +9,7 @@ using ICSharpCode.Decompiler.CSharp;
 using ICSharpCode.Decompiler.Metadata;
 using ICSharpCode.Decompiler.TypeSystem;
 
-namespace AbpProjectTools;
+namespace AbpProjectTools.Services;
 
 public class TypeService
 {
@@ -35,9 +35,7 @@ public class TypeService
         var webBinDir = _hostProjectDirectory.GetDirectories("Debug", SearchOption.AllDirectories).FirstOrDefault();
 
         if (webBinDir.EnumerateDirectories().Any())
-        {
             webBinDir = webBinDir.EnumerateDirectories().FirstOrDefault();
-        }
 
         resolver.AddSearchDirectory(webBinDir.FullName);
 
@@ -74,14 +72,10 @@ public class TypeService
             var typeDefinitions = decompiler.TypeSystem.MainModule.TypeDefinitions.Where(x => x.Name == name);
 
             if (typeDefinitions.Any() == false)
-            {
                 throw new Exception($"The type '{name}' not found.");
-            }
 
             if (typeDefinitions.Count() > 1)
-            {
                 throw new Exception($"The type name '{name}' find more then one. please use full type name.");
-            }
 
             var findType = typeDefinitions.First();
 
@@ -250,9 +244,7 @@ public class TypeService
         if (type.GetTypeCode() == TypeCode.Empty)
         {
             if (type.TypeArguments.Count > 0)
-            {
                 return type.TypeArguments[0].Name;
-            }
 
             return type.Name;
         }
