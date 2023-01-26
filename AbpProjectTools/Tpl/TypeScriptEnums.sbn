@@ -1,5 +1,6 @@
 ﻿/**
- * Generate from swagger json url: {{url}} 
+ * Generate from url: {{url}}
+ * It is recommended not to modify the document
  **/
 //
 // enum types

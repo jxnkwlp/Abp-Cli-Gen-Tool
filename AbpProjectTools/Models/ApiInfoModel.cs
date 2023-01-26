@@ -3,13 +3,13 @@ using AbpProjectTools.Models;
 
 namespace AbpProjectTools
 {
-    public class SwaggerApiInfoModel
+    public class ApiInfoModel
     {
         public IList<ApiDefinition> Apis { get; set; }
 
         public IList<ApiSchameDefinition> Schames { get; set; }
 
-        public SwaggerApiInfoModel()
+        public ApiInfoModel()
         {
             Apis = new List<ApiDefinition>();
             Schames = new List<ApiSchameDefinition>();

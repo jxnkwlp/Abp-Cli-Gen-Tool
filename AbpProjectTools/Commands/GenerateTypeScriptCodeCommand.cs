@@ -23,14 +23,14 @@ namespace AbpProjectTools.Commands
             command.AddOption(new Option<string>("--request-import", ""));
 
 
-            var helper = new SwaggerService();
+            var helper = new OpenApiDocumentService();
 
             command.Handler = CommandHandler.Create<GenerateTypeScriptCodeCommandOptions>(async options =>
             {
                 var templateService = new TemplateService(options.Templates);
 
                 Console.WriteLine($"🚗 Staring generate typescript services and typing file...");
-                Console.WriteLine($"🚗 Loading swagger document api url '{options.SwaggerUrl}'... ");
+                Console.WriteLine($"🚗 Loading api document from url '{options.SwaggerUrl}'... ");
 
                 var apiInfo = await helper.LoadAsync(options.SwaggerUrl);
 

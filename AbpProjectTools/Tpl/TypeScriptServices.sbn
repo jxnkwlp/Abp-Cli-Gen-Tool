@@ -1,5 +1,5 @@
 ﻿/**
- * Generate from swagger json url: {{url}}
+ * Generate from url: {{url}}
  * It is recommended not to modify the document
  * Total count: {{apis.size}}
  **/
@@ -34,13 +34,13 @@ end-}}
 
 {{-func out_path_params (params) ~}}
 {{~ for $item in params ~}}
-    {{ $item.name | camel_case}}: {{$item.enumerable?"Enum."+$item.type_name:renderType $item.type $item.type_name}}{{ for.last ? "":"," -}}
+    {{ $item.name | camel_case}}: {{$item.enumerable?"Enum."+$item.type_literal:renderType $item.type $item.type_literal}}{{ for.last ? "":"," -}}
 {{~end~}}
 {{~end~}}
 
 {{-func out_query_params(params) ~}}
 {{~ for $item in params ~}}
-        {{ $item.name | camel_case}}{{$item.required?"":"?"}}: {{$item.enumerable?"Enum."+$item.type_name:renderType $item.type $item.type_name}}{{$item.required? "":" | undefined"}}{{ for.last ? "":"," }}
+        {{ $item.name | camel_case}}{{$item.required?"":"?"}}: {{$item.enumerable?"Enum."+$item.type_literal:renderType $item.type $item.type_literal}}{{$item.required? "":" | undefined"}}{{ for.last ? "":"," }}
 {{~end~}}
 {{~end~}}
 
@@ -71,6 +71,9 @@ export async function {{api.operation_id | camel_case }}(
 ) {
     return request<{{api.response_param_schame? ((api.project_name ?? "API.") + api.response_param_schame ): "any"}}>(`{{ api.path | replace "{" "${" }}`, {
         method: '{{api.method | string.upcase}}',
+{{~if api.request_type !='json'}}
+        requestType: '{{api.request_type ?? "json" }}',
+{{~end~}}
 {{~if api.query_params.size > 0 ~}}
         params: params,
 {{~end~}}
