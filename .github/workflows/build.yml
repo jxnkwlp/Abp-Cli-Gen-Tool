@@ -9,7 +9,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -19,7 +19,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v1 
       with:
-        dotnet-version: 5.0.x
+        dotnet-version: 6.0.x
 
     - name: Install Dotnet Tool
       run: |
@@ -34,11 +34,6 @@ jobs:
           gitci release changes --output ./changeslog.md
           gitci version next --format json --output ./version.json --build-ver "${{env.GITHUB_SHA_SHORT}}" 
           ls ./
-
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1 
-      with:
-        dotnet-version: 6.0.x
 
     - name: Restore dependencies
       run: dotnet restore
