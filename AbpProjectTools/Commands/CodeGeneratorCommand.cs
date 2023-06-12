@@ -14,11 +14,12 @@ public class CodeGeneratorCommand : CommandBase
         var command = new Command("generate", "Code generate");
         command.AddAlias("gen");
 
+        // backend
         var backendCommand = new Command("backend", "Generate abp repository, CRUD app service, http controller code");
 
         backendCommand.AddGlobalOption(new Option<string>("--slu-dir", () => Directory.GetCurrentDirectory(), "The solution root dir. Default is current directory") { IsRequired = false, });
-        backendCommand.AddGlobalOption(new Option<string>("--name", "The name of entity or app service") { IsRequired = true, });
         backendCommand.AddGlobalOption(new Option<string>("--project-name", () => GetDefaultSolutionName(), "The project name. Default is solution name if found in solution directory") { IsRequired = true, });
+        backendCommand.AddGlobalOption(new Option<string>("--name", "The name of entity or app service") { IsRequired = true, });
         backendCommand.AddGlobalOption(new Option<bool>("--overwrite", () => false, "Over write file if the target file exists"));
         backendCommand.AddGlobalOption(new Option<string>("--templates", "The template files directory"));
 
@@ -29,6 +30,7 @@ public class CodeGeneratorCommand : CommandBase
 
         command.AddCommand(backendCommand);
 
+        // fontend
         var fontendCommand = new Command("fontend", "Generate ts type and service code");
         fontendCommand.AddCommand(new GenerateTypeScriptCodeCommand().GetCommand());
 

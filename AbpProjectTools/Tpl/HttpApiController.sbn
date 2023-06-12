@@ -3,43 +3,45 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Volo.Abp;
-using Volo.Abp.Application.Dtos; 
+using Volo.Abp.Application.Dtos;
+{{~for item in namespaces~}}
+using {{item}};
+{{~end~}}
 
-namespace {{app_service.namespace}}
+namespace {{app_service.namespace}};
+
+[RemoteService]
+[Route("api/{{app_service.name | to_slug_string | to_pluralize }}")]
+public class {{app_service.name}}Controller : {{base_controller}}, I{{app_service.name}}AppService
 {
-    [RemoteService]
-    [Route("api/{{app_service.name | to_slug_string | to_pluralize }}")]
-    public class {{app_service.name}}Controller : {{project_name}}Controller, I{{app_service.name}}AppService
-    {
-        private readonly I{{app_service.name}}AppService _service;
+    private readonly I{{app_service.name}}AppService _service;
 
-        public {{app_service.name}}Controller(I{{app_service.name}}AppService service)
-        {
-            _service = service;
-        }
+    public {{app_service.name}}Controller(I{{app_service.name}}AppService service)
+    {
+        _service = service;
+    }
 
 {{~for item in app_service.methods~}}
-    {{~if !item.is_inherited~}}
-        [{{routes[item.name].method}}({{routes[item.name].url ? "\""+routes[item.name].url+"\"" : "" }})]
-        public virtual {{item.return_type}} {{~item.return_type_arguments.size>0?"<":"" ~}}
-    {{-for p in item.return_type_arguments-}}
-                {{p.name}}{{for.last ? "":","}}
+{{~if !item.is_inherited~}}
+    [{{routes[item.name].method}}({{routes[item.name].url ? "\""+routes[item.name].url+"\"" : "" }})]
+    public virtual {{item.type}} {{~item.type_arguments.size>0?"<":"" ~}}
+{{-for p in item.type_arguments-}}
+            {{p.name}}{{for.last ? "":","}}
+{{-end-}}
+{{- item.type_arguments.size > 0 ? "> ":" " -}}
+        {{-item.name}}(
+    {{-for p in item.params-}}
+            {{p.type}} {{p.name}}{{for.last?"":", "}}
     {{-end-}}
-    {{- item.return_type_arguments.size > 0 ? "> ":" " -}}
-            {{-item.name}}(
-        {{-for p in item.params-}}
-                {{p.type}} {{p.name}}{{for.last?"":", "}}
-        {{-end-}}
-        )
-        {
-            return _service.{{item.name}}(
-                {{-for p in item.params-}}
-                    {{p.name}}{{for.last?"":", "}}
-                {{-end-}}
-            );
-        }
-
-    {{~end~}}
-{{~end~}}
+    )
+    {
+        return _service.{{item.name}}(
+            {{-for p in item.params-}}
+                {{p.name}}{{for.last?"":", "}}
+            {{-end-}}
+        );
     }
+
+{{~end~}}
+{{~end~}}
 }

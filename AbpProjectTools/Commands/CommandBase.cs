@@ -19,11 +19,11 @@ public abstract class CommandBase : ICmdCommand
         if (!Directory.Exists(directory))
             Directory.CreateDirectory(directory);
 
-#if DEBUG
-        Console.WriteLine($"⬇️⬇️ File '{filePath}' Content Preview ... ".Pastel(Color.Aqua));
-        Console.WriteLine(content.Pastel(Color.Aqua));
-        Console.WriteLine();
-#endif
+//#if DEBUG
+//        Console.WriteLine($"⬇️⬇️ File '{filePath}' Content Preview ... ".Pastel(Color.Aqua));
+//        Console.WriteLine(content.Pastel(Color.Aqua));
+//        Console.WriteLine();
+//#endif
 
         if (File.Exists(filePath) && overwrite == false)
         {

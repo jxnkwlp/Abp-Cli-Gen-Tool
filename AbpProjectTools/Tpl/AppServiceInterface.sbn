@@ -3,31 +3,30 @@ using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 
-namespace {{domain.type_namespace}}
+namespace {{domain.type_namespace}};
+
+{{~if basic_service || !crud~}}
+public interface I{{domain.type_name}}AppService : IApplicationService
+{{~else if split_list_type~}}
+public interface I{{domain.type_name}}AppService : ICrudAppService<{{domain.type_name}}Dto, {{list_result_type_name}}, {{domain.type_key}}, {{list_request_type_name}}, {{create_type_name}}, {{update_type_name}}>
+{{~else~}}
+public interface I{{domain.type_name}}AppService : ICrudAppService<{{domain.type_name}}Dto, {{domain.type_key}}, {{list_request_type_name}}, {{create_type_name}}, {{update_type_name}}>
+{{~end~}}
 {
-    {{~if basic_service || !crud~}}
-    public interface I{{domain.type_name}}AppService : IApplicationService
-    {{~else if split_list_type~}}
-    public interface I{{domain.type_name}}AppService : ICrudAppService<{{domain.type_name}}Dto, {{list_result_type_name}}, {{domain.type_key}}, {{list_request_type_name}}, {{create_type_name}}, {{update_type_name}}>
-    {{~else~}}
-    public interface I{{domain.type_name}}AppService : ICrudAppService<{{domain.type_name}}Dto, {{domain.type_key}}, {{list_request_type_name}}, {{create_type_name}}, {{update_type_name}}>
-    {{~end~}}
-    {
 {{~if !crud ~}}
-    {{~ if split_list_type ~}}
-        Task<PagedResultDto<{{list_result_type_name}}>> GetListAsync({{list_request_type_name}} input);
-    {{~else~}}
-        Task<PagedResultDto<{{domain.type_name}}Dto>> GetListAsync({{list_request_type_name}} input);
-    {{~end~}}
-
-        Task<{{domain.type_name}}Dto> GetAsync({{domain.type_key}} id);
-
-        Task<{{domain.type_name}}Dto> CreateAsync({{create_type_name}} input);
-
-        Task<{{domain.type_name}}Dto> UpdateAsync({{domain.type_key}} id, {{update_type_name}} input);
-
-        Task DeleteAsync({{domain.type_key}} id);
+{{~ if split_list_type ~}}
+    Task<PagedResultDto<{{list_result_type_name}}>> GetListAsync({{list_request_type_name}} input);
+{{~else~}}
+    Task<PagedResultDto<{{domain.type_name}}Dto>> GetListAsync({{list_request_type_name}} input);
 {{~end~}}
 
-    }
+    Task<{{domain.type_name}}Dto> GetAsync({{domain.type_key}} id);
+
+    Task<{{domain.type_name}}Dto> CreateAsync({{create_type_name}} input);
+
+    Task<{{domain.type_name}}Dto> UpdateAsync({{domain.type_key}} id, {{update_type_name}} input);
+
+    Task DeleteAsync({{domain.type_key}} id);
+{{~end~}}
+
 }

@@ -4,16 +4,14 @@ using System.Threading;
 using System.Threading.Tasks;
 using Volo.Abp.Domain.Repositories;
 
-namespace {{type_namespace}}
+namespace {{type_namespace}};
+
+public interface I{{type_name}}Repository : IRepository<{{type_name}}, {{type_key}}>
 {
-    public interface I{{type_name}}Repository : IRepository<{{type_name}}, {{type_key}}>
-    {
-        Task<long> GetCountAsync(string filter, CancellationToken cancellationToken = default);
+    Task<long> CountAsync(string filter, CancellationToken cancellationToken = default);
 
-        Task<List<{{type_name}}>> GetListAsync(string filter, bool includeDetails = false, CancellationToken cancellationToken = default);
+    Task<List<{{type_name}}>> GetListAsync(string filter, bool includeDetails = false, CancellationToken cancellationToken = default);
 
-        Task<List<{{type_name}}>> GetPagedListAsync(int skipCount, int maxResultCount, string filter, string sorting, bool includeDetails = false, CancellationToken cancellationToken = default);
-
-    }
+    Task<List<{{type_name}}>> GetPagedListAsync(int skipCount, int maxResultCount, string filter, string sorting, bool includeDetails = false, CancellationToken cancellationToken = default);
 
 }

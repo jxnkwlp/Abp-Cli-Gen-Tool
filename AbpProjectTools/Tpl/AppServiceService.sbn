@@ -5,79 +5,100 @@ using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
 
-namespace {{domain.type_namespace}}
+namespace {{domain.type_namespace}};
+
+{{~if basic_service || !crud~}}
+public class {{domain.type_name}}AppService : {{project_name}}AppService, I{{domain.type_name}}AppService
+{{~else if split_list_type~}}
+public class {{domain.type_name}}AppService : CrudAppService<{{domain.type_name}},  {{domain.type_name}}Dto, {{list_result_type_name}}, {{domain.type_key}}, {{list_request_type_name}}, {{create_type_name}}, {{update_type_name}}>, I{{domain.type_name}}AppService
+{{~else~}}
+public class {{domain.type_name}}AppService : CrudAppService<{{domain.type_name}}, {{domain.type_name}}Dto, {{domain.type_key}}, {{list_request_type_name}}, {{create_type_name}}, {{update_type_name}}>, I{{domain.type_name}}AppService
+{{~end~}}
 {
-    {{~if basic_service || !crud~}}
-    public class {{domain.type_name}}AppService : {{project_name}}AppService, I{{domain.type_name}}AppService
-    {{~else if split_list_type~}}
-    public class {{domain.type_name}}AppService : CrudAppService<{{domain.type_name}},  {{domain.type_name}}Dto, {{list_result_type_name}}, {{domain.type_key}}, {{list_request_type_name}}, {{create_type_name}}, {{update_type_name}}>, I{{domain.type_name}}AppService
-    {{~else~}}
-    public class {{domain.type_name}}AppService : CrudAppService<{{domain.type_name}}, {{domain.type_name}}Dto, {{domain.type_key}}, {{list_request_type_name}}, {{create_type_name}}, {{update_type_name}}>, I{{domain.type_name}}AppService
-    {{~end~}}
-    {
 {{~if !basic_service && crud~}}
-        public {{domain.type_name}}AppService(IRepository<{{domain.type_name}}, {{domain.type_key}}> repository) : base(repository)
-        {
-        }
+    public {{domain.type_name}}AppService(IRepository<{{domain.type_name}}, {{domain.type_key}}> repository) : base(repository)
+    {
+    }
 {{~end~}}
 {{~if !crud~}}
-        private readonly {{domain.type_name}}Manager _{{domain.type_name| camel_case}}Manager;
-        private readonly I{{domain.type_name}}Repository _{{domain.type_name| camel_case}}Repository;
+    private readonly {{domain.type_name}}Manager _{{domain.type_name| camel_case}}Manager;
+    private readonly I{{domain.type_name}}Repository _{{domain.type_name| camel_case}}Repository;
 
-        public {{domain.type_name}}AppService({{domain.type_name}}Manager {{domain.type_name| camel_case}}Manager, I{{domain.type_name}}Repository {{domain.type_name| camel_case}}Repository)
-        {
-            _{{domain.type_name | camel_case}}Manager = {{domain.type_name| camel_case}}Manager;
-            _{{domain.type_name | camel_case}}Repository = {{domain.type_name| camel_case}}Repository;
-        }
-
-        {{~ if split_list_type ~}}
-        public virtual async Task<PagedResultDto<{{list_result_type_name}}>> GetListAsync({{list_request_type_name}} input)
-        {{~else~}}
-        public virtual async Task<PagedResultDto<{{domain.type_name}}Dto>> GetListAsync({{list_request_type_name}} input)
-        {{~end~}}
-        {
-            var count = await _{{domain.type_name | camel_case}}Repository.GetCountAsync();
-            var list = await _{{domain.type_name | camel_case}}Repository.GetPagedListAsync(input.SkipCount, input.MaxResultCount, nameof({{domain.type_name}}.CreationTime) + " desc");
-
-            return new PagedResultDto<{{list_result_type_name}}>()
-            {
-                Items = ObjectMapper.Map<List<{{domain.type_name}}>, List<{{list_result_type_name}}>>(list),
-                TotalCount = count,
-            };
-        }
-
-        public virtual async Task<{{domain.type_name}}Dto> GetAsync({{domain.type_key}} id)
-        {
-            var entity = await _{{domain.type_name | camel_case}}Repository.GetAsync(id);
-
-            return ObjectMapper.Map<{{domain.type_name}}, {{domain.type_name}}Dto>(entity);
-        }
-
-        public virtual async Task<{{domain.type_name}}Dto> CreateAsync({{create_type_name}} input)
-        {
-            var entity = new WorkOrderMessage();
-            // TODO
-            await _{{domain.type_name | camel_case}}Repository.InsertAsync(entity);
-
-            return ObjectMapper.Map<{{domain.type_name}}, {{domain.type_name}}Dto>(entity);
-        }
-
-        public virtual async Task<{{domain.type_name}}Dto> UpdateAsync({{domain.type_key}} id, {{update_type_name}} input)
-        {
-            var entity = await _{{domain.type_name | camel_case}}Repository.GetAsync(id);
-
-            // TODO
-
-            await _{{domain.type_name | camel_case}}Repository.UpdateAsync(entity);
-
-            return ObjectMapper.Map<{{domain.type_name}}, {{domain.type_name}}Dto>(entity);
-        }
-
-        public virtual async Task DeleteAsync({{domain.type_key}} id)
-        {
-            await _{{domain.type_name | camel_case}}Repository.DeleteAsync(id);
-        }
-    {{~end~}}
-
+    public {{domain.type_name}}AppService({{domain.type_name}}Manager {{domain.type_name| camel_case}}Manager, I{{domain.type_name}}Repository {{domain.type_name| camel_case}}Repository)
+    {
+        _{{domain.type_name | camel_case}}Manager = {{domain.type_name| camel_case}}Manager;
+        _{{domain.type_name | camel_case}}Repository = {{domain.type_name| camel_case}}Repository;
     }
+
+    {{~ if split_list_type ~}}
+    public virtual async Task<PagedResultDto<{{list_result_type_name}}>> GetListAsync({{list_request_type_name}} input)
+    {{~else~}}
+    public virtual async Task<PagedResultDto<{{domain.type_name}}Dto>> GetListAsync({{list_request_type_name}} input)
+    {{~end~}}
+    {
+        var count = await _{{domain.type_name | camel_case}}Repository.GetCountAsync();
+        var list = await _{{domain.type_name | camel_case}}Repository.GetPagedListAsync(input.SkipCount, input.MaxResultCount, nameof({{domain.type_name}}.CreationTime) + " desc");
+
+        return new PagedResultDto<{{list_result_type_name}}>()
+        {
+            Items = ObjectMapper.Map<List<{{domain.type_name}}>, List<{{list_result_type_name}}>>(list),
+            TotalCount = count,
+        };
+    }
+
+    public virtual async Task<{{domain.type_name}}Dto> GetAsync({{domain.type_key}} id)
+    {
+        var entity = await _{{domain.type_name | camel_case}}Repository.GetAsync(id);
+
+        return ObjectMapper.Map<{{domain.type_name}}, {{domain.type_name}}Dto>(entity);
+    }
+
+    public virtual async Task<{{domain.type_name}}Dto> CreateAsync({{create_type_name}} input)
+    {
+        // TODO: Review
+        {{~ if domain.constructor_with_id}}
+        var entity = new {{domain.type_name}}(GuidGenerator.Create())
+        {{~else~}}
+        var entity = new {{domain.type_name}}()
+        {{~ end ~}}
+        {
+            {{~for item in domain.properties~}}
+            {{~if item.is_class~}}
+            {{item.name}} = default,
+            {{~else if !item.is_inherited~}}
+            {{item.name}} = input.{{item.name}},
+            {{~end~}}
+            {{~end~}}
+        };
+
+        await _{{domain.type_name | camel_case}}Repository.InsertAsync(entity);
+
+        return ObjectMapper.Map<{{domain.type_name}}, {{domain.type_name}}Dto>(entity);
+    }
+
+    public virtual async Task<{{domain.type_name}}Dto> UpdateAsync({{domain.type_key}} id, {{update_type_name}} input)
+    {
+        // TODO: Review
+
+        var entity = await _{{domain.type_name | camel_case}}Repository.GetAsync(id);
+
+        {{~for item in domain.properties~}}
+        {{~if item.is_class~}}
+        // entity.{{item.name}} = input.{{item.name}};
+        {{~else if !item.is_inherited~}}
+        entity.{{item.name}} = input.{{item.name}};
+        {{~end~}}
+        {{~end~}}
+
+        await _{{domain.type_name | camel_case}}Repository.UpdateAsync(entity);
+
+        return ObjectMapper.Map<{{domain.type_name}}, {{domain.type_name}}Dto>(entity);
+    }
+
+    public virtual async Task DeleteAsync({{domain.type_key}} id)
+    {
+        await _{{domain.type_name | camel_case}}Repository.DeleteAsync(id);
+    }
+{{~end~}}
+
 }

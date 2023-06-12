@@ -6,10 +6,9 @@ using Volo.Abp;
 using Volo.Abp.Domain.Services;
 using Volo.Abp.Uow;
 
-namespace {{type_namespace}}
-{
-    public class {{type_name}}Manager : DomainService
-    {
+namespace {{type_namespace}};
 
-    }
+public class {{type_name}}Manager : DomainService
+{
+
 }

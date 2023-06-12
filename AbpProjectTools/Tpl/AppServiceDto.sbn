@@ -2,25 +2,29 @@
 using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
-
-namespace {{domain.type_namespace}}
-{
-    {{~if is_list_request_type~}}
-    public class {{type_name}} : PagedResultRequestDto
-    {{~else if is_list_result_type~}}
-    public class {{type_name}} : EntityDto<{{domain.type_key}}>
-    {{~else if is_create_type || is_update_type ~}}
-    public class {{type_name}}
-    {{~else if is_entity_type~}}
-    public class {{type_name}} : AuditedEntityDto<{{domain.type_key}}>
-    {{~end~}}
-    {
-        {{~if !is_list_request_type~}}
-{{~for item in domain.properties~}}
-    {{~if !item.is_inherited~}}
-        public {{item.type}}{{item.is_nullable?"?":""}} {{item.name}} { get; set; }
-    {{~end~}}
+{{~for item in domain.property_namespaces~}}
+using {{item}};
 {{~end~}}
-        {{~end~}}
-    }
+
+namespace {{domain.type_namespace}};
+
+{{~if is_list_request_type~}}
+public class {{type_name}} : PagedResultRequestDto
+{{~else if is_list_result_type~}}
+public class {{type_name}} : EntityDto<{{domain.type_key}}>
+{{~else if is_create_type || is_update_type ~}}
+public class {{type_name}}
+{{~else if is_entity_type~}}
+public class {{type_name}} : AuditedEntityDto<{{domain.type_key}}>
+{{~else}}
+public class {{type_name}} : EntityDto
+{{~end~}}
+{
+    {{~if !is_list_request_type~}}
+{{~for item in domain.properties~}}
+{{~if !item.is_inherited~}}
+    public {{item.type_code}}{{item.is_nullable?"?":""}} {{item.name}} { get; set; }{{item.is_required ? " = null!;": ""}}
+{{~end~}}
+{{~end~}}
+    {{~end~}}
 }

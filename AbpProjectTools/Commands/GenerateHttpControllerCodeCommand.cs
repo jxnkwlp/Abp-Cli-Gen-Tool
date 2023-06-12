@@ -28,11 +28,14 @@ public class GenerateHttpControllerCodeCommand : CommandBase
                 {
                     Console.WriteLine($"🚗 Staring generate '{options.Name}' app-service for http api code ...");
 
-                    var appServiceInfo = typeService.GetAppServiceContract(options.Name);
+                    var appServiceInfo = typeService.GetAppContractService(options.Name);
+                    var httpControllerDefinition = typeService.GetHttpControllerTypeDefinitions();
 
                     var fileContent = templateService.Render("HttpApiController", new
                     {
-                        projectName = options.ProjectName,
+                        Namespaces = httpControllerDefinition.ImportNamespaces,
+                        BaseController = httpControllerDefinition.BaseControllerType,
+                        // projectName = options.ProjectName,
                         appService = appServiceInfo,
                         routes = GenerateRoute(appServiceInfo.Methods),
                     });
