@@ -11,7 +11,7 @@ using ICSharpCode.Decompiler.TypeSystem;
 
 namespace AbpProjectTools.Services;
 
-public class TypeService
+public class TypeService : IDisposable
 {
     private readonly string _solutionDir;
     private readonly DirectoryInfo _hostProjectDirectory = null;
@@ -31,7 +31,7 @@ public class TypeService
 
     private CSharpDecompiler GetDecompiler(string fileName)
     {
-        var module = new PEFile(fileName);
+        using var module = new PEFile(fileName);
 
         var resolver = new UniversalAssemblyResolver(fileName, false, module.DetectTargetFrameworkId());
         foreach (var item in UniversalAssemblyResolver.GetGacPaths())
@@ -71,7 +71,7 @@ public class TypeService
                 throw new Exception("The domain dll not found. Please build project .");
 
             var decompiler = GetDecompiler(domainDllFile.FullName);
-
+            
             string assemblyName = decompiler.TypeSystem.MainModule.AssemblyName;
             string rootNamespace = decompiler.TypeSystem.MainModule.RootNamespace.Name;
 
@@ -415,6 +415,11 @@ public class TypeService
             default:
                 throw new Exception($"Unknow type code '{type.GetTypeCode()}'");
         }
+    }
+
+    public void Dispose()
+    {
+        
     }
 }
 

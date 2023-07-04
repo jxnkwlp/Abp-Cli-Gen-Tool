@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace AbpProjectTools.Services;
 
-public class FileHelper
+public static class FileHelper
 {
     public static FileInfo FindFile(string root, string name)
     {
@@ -82,7 +82,7 @@ public class FileHelper
 
         return dir.EnumerateDirectories("*.EntityFrameworkCore", SearchOption.AllDirectories).FirstOrDefault();
     }
-    
+
     public static DirectoryInfo GetMongoDbProjectDirectory(string root)
     {
         var dir = new DirectoryInfo(root);

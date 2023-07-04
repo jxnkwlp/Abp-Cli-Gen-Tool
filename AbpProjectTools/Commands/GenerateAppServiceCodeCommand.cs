@@ -25,7 +25,7 @@ public class GenerateAppServiceCodeCommand : CommandBase
         command.AddOption(new Option<bool>("--basic-service", ""));
         command.AddOption(new Option<bool>("--crud", () => false, ""));
 
-        command.Handler = CommandHandler.Create<GenerateAppServiceCommandOption>(options =>
+        command.Handler = CommandHandler.Create<BackendAppServiceCodeGeneratorCommandOption>(options =>
         {
             if (string.IsNullOrEmpty(options.ListRequestTypeName))
                 options.ListRequestTypeName = $"{options.Name}ListRequestDto";
@@ -56,9 +56,6 @@ public class GenerateAppServiceCodeCommand : CommandBase
 
             var ContractsProject = FileHelper.GetApplicationContractProjectDirectory(options.SluDir);
             var appServiceProject = FileHelper.GetApplicationProjectDirectory(options.SluDir);
-
-            if (string.IsNullOrWhiteSpace(options.ProjectName))
-                options.ProjectName = typeService.GetSlutionName();
 
             try
             {

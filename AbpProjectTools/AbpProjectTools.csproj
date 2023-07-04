@@ -17,6 +17,13 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <Compile Remove="Commands\GenerateAppServiceCodeCommand.cs" />
+      <Compile Remove="Commands\GenerateDomainServiceCodeCommand.cs" />
+      <Compile Remove="Commands\GenerateHttpControllerCodeCommand.cs" />
+      <Compile Remove="Commands\GenerateRepositoryCodeCommand.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <PackageReference Include="NSwag.Core" Version="13.19.0" />
         <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21308.1" />
         <PackageReference Include="ICSharpCode.Decompiler" Version="8.0.0.7345" />

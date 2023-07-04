@@ -24,7 +24,7 @@ public static class SourceBuildHelper
         }
 
         var procStartInfo = new ProcessStartInfo(fileName,
-            $"{argumentPrefix} \" dotnet build \"{folder}\" \""
+            $"{argumentPrefix} \" dotnet build -v q  --nologo --no-incremental \"{folder}\" \""
         );
 
         procStartInfo.CreateNoWindow = false;
@@ -43,7 +43,9 @@ public static class SourceBuildHelper
 
             Thread.Sleep(500);
 
-            return hasError;
+            process.Kill();
+
+            return !hasError;
         }
         catch (Exception)
         {

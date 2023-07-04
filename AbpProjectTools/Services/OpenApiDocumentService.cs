@@ -91,6 +91,19 @@ public class OpenApiDocumentService
                     {
                         apiDefinition.RequestParamSchame = FormatTypeName(requestBodySchema.Reference.Title);
                     }
+                    else if (string.IsNullOrWhiteSpace(requestBodySchema.Title))
+                    {
+                        apiDefinition.RequestParamSchame = $"{apiDefinition.OperationId}Request";
+
+                        // create schame
+                        var props = new List<ApiParamItem>();
+                        LoopActualProperties(requestBodySchema.ActualProperties, props);
+                        result.Schames.Add(new ApiSchameDefinition()
+                        {
+                            Name = $"{apiDefinition.OperationId}Request",
+                            Params = props,
+                        });
+                    }
                     else
                     {
                         apiDefinition.RequestParamSchame = FormatTypeName(requestBodySchema.Title);
@@ -299,8 +312,11 @@ public class OpenApiDocumentService
         return result;
     }
 
-    private static ApiParamType GetItemType(JsonObjectType type)
+    private static ApiParamType GetItemType(JsonObjectType type, string format = null)
     {
+        if (format == "binary")
+            return ApiParamType.Unknow;
+
         switch (type)
         {
             case JsonObjectType.Boolean: return ApiParamType.Boolean;
@@ -320,8 +336,8 @@ public class OpenApiDocumentService
         {
             var p = new ApiParamItem()
             {
-                Name = prop.Key,
-                Type = GetItemType(prop.Value.Type),
+                Name = ConvertName(prop.Key),
+                Type = GetItemType(prop.Value.Type, prop.Value.Format),
                 TypeLiteral = "", //
                 Description = prop.Value.Description,
                 Required = prop.Value.IsRequired, //.IsNullableRaw == true ? false : true,
@@ -462,14 +478,19 @@ public class OpenApiDocumentService
 
     private static string FormatTypeName(string typeName)
     {
-        return UseFullTypeName ? typeName.Replace(".", null) : GetShortTypeName(typeName);
+        return UseFullTypeName ? typeName.Replace(".", null).Replace("+", null) : GetShortTypeName(typeName);
     }
 
     private static string GetShortTypeName(string fullName)
     {
         var typeName = fullName;
-        if (fullName.Contains("."))
+        if (fullName.Contains('.'))
             typeName = fullName.Substring(fullName.LastIndexOf('.') + 1);
-        return typeName;
+        return typeName.Replace("+", null);
+    }
+
+    private static string ConvertName(string name)
+    {
+        return System.Text.Json.JsonNamingPolicy.CamelCase.ConvertName(name);
     }
 }

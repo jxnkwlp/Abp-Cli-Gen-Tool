@@ -64,7 +64,7 @@ public class {{domain.type_name}}AppService : CrudAppService<{{domain.type_name}
         {
             {{~for item in domain.properties~}}
             {{~if item.is_class~}}
-            {{item.name}} = default,
+            // {{item.name}} = default,
             {{~else if !item.is_inherited~}}
             {{item.name}} = input.{{item.name}},
             {{~end~}}

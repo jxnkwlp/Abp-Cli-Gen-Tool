@@ -70,12 +70,11 @@ public class GenerateTypeScriptCodeCommand : CommandBase
             var fileContent2 = templateService.Render("TypeScriptTypes", new
             {
                 projectName = options.ProjectName,
-                schames = apiInfo.Schames.ToList(),
+                schames = apiInfo.Schames.OrderBy(x => x.Name).ToList(),
                 Count = apiInfo.Schames.Count,
                 Url = options.SwaggerUrl,
                 Debug = options.Debug,
                 ProjectName = options.ProjectName,
-
             });
 
             WriteFileContent(Path.Combine(outputPath, "typings.d.ts"), fileContent2, true);

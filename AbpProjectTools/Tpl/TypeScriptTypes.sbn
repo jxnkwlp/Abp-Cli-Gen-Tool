@@ -27,7 +27,7 @@ end ~}}
 
 {{~ func output_params (params) ~}}
     {{~ for $item in params ~}}
-        {{ $item.name}}{{$item.required?"":"?"}}: {{$item.enumerable?"Enum."+$item.type_literal:renderType $item.type $item.type_literal}}{{$item.required?"":" | undefined"}};
+        {{ $item.name | camel_case }}{{$item.required?"":"?"}}: {{$item.enumerable?"Enum."+$item.type_literal:renderType $item.type $item.type_literal}}{{$item.required?"":" | undefined"}};
     {{~ end ~}}
 {{~ end ~}}
 

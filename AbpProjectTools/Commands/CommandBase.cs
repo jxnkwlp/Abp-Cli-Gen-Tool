@@ -19,11 +19,11 @@ public abstract class CommandBase : ICmdCommand
         if (!Directory.Exists(directory))
             Directory.CreateDirectory(directory);
 
-//#if DEBUG
-//        Console.WriteLine($"⬇️⬇️ File '{filePath}' Content Preview ... ".Pastel(Color.Aqua));
-//        Console.WriteLine(content.Pastel(Color.Aqua));
-//        Console.WriteLine();
-//#endif
+        //#if DEBUG
+        //        Console.WriteLine($"⬇️⬇️ File '{filePath}' Content Preview ... ".Pastel(Color.Aqua));
+        //        Console.WriteLine(content.Pastel(Color.Aqua));
+        //        Console.WriteLine();
+        //#endif
 
         if (File.Exists(filePath) && overwrite == false)
         {
@@ -43,4 +43,22 @@ public abstract class CommandBase : ICmdCommand
         return Path.GetFileNameWithoutExtension(file);
     }
 
+    protected static string GetDefaultSolutionName()
+    {
+        var slnFiles = Directory.GetFiles(Directory.GetCurrentDirectory(), "*.sln", SearchOption.TopDirectoryOnly);
+
+        if (slnFiles?.Length == 1)
+        {
+            var name = Path.GetFileNameWithoutExtension(slnFiles[0]);
+
+            if (name.LastIndexOf('.') > 0)
+            {
+                name = name.Substring(name.LastIndexOf('.') + 1);
+            }
+
+            return name;
+        }
+
+        return null;
+    }
 }

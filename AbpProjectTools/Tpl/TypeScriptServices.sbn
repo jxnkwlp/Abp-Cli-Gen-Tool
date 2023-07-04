@@ -71,7 +71,7 @@ export async function {{api.operation_id | camel_case }}(
 ) {
     return request<{{api.response_param_schame? ((api.project_name ?? "API.") + api.response_param_schame ): "any"}}>(`{{ api.path | replace "{" "${" }}`, {
         method: '{{api.method | string.upcase}}',
-{{~if api.request_type !='json'}}
+{{~if api.request_type !='json'~}}
         requestType: '{{api.request_type ?? "json" }}',
 {{~end~}}
 {{~if api.query_params.size > 0 ~}}
