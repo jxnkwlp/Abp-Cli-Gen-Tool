@@ -52,7 +52,7 @@ public static class FileHelper
     {
         var dir = new DirectoryInfo(root);
 
-        return dir.EnumerateDirectories("*.Gbp.Domain.Shared", SearchOption.AllDirectories).FirstOrDefault();
+        return dir.EnumerateDirectories("*.Domain.Shared", SearchOption.AllDirectories).FirstOrDefault();
     }
 
     public static DirectoryInfo GetHttpControllerProjectDirectory(string root)
@@ -83,11 +83,11 @@ public static class FileHelper
         return dir.EnumerateDirectories("*.EntityFrameworkCore", SearchOption.AllDirectories).FirstOrDefault();
     }
 
-    public static DirectoryInfo GetMongoDbProjectDirectory(string root)
+    public static DirectoryInfo GetMongoDBProjectDirectory(string root)
     {
         var dir = new DirectoryInfo(root);
 
-        return dir.EnumerateDirectories("*.MongoDb", SearchOption.AllDirectories).FirstOrDefault();
+        return dir.EnumerateDirectories("*.MongoDB", SearchOption.AllDirectories).FirstOrDefault();
     }
 
 

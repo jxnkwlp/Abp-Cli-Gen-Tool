@@ -41,10 +41,13 @@ public class TypeService : IDisposable
 
         var webBinDir = _hostProjectDirectory.GetDirectories("Debug", SearchOption.AllDirectories).FirstOrDefault();
 
-        if (webBinDir.EnumerateDirectories().Any())
-            webBinDir = webBinDir.EnumerateDirectories().FirstOrDefault();
+        if (webBinDir?.Exists == true)
+        {
+            if (webBinDir.EnumerateDirectories().Any())
+                webBinDir = webBinDir.EnumerateDirectories().FirstOrDefault();
 
-        resolver.AddSearchDirectory(webBinDir.FullName);
+            resolver.AddSearchDirectory(webBinDir.FullName);
+        }
 
         // add nuget cache 
         var nugetCache = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @".nuget\packages");
@@ -71,7 +74,7 @@ public class TypeService : IDisposable
                 throw new Exception("The domain dll not found. Please build project .");
 
             var decompiler = GetDecompiler(domainDllFile.FullName);
-            
+
             string assemblyName = decompiler.TypeSystem.MainModule.AssemblyName;
             string rootNamespace = decompiler.TypeSystem.MainModule.RootNamespace.Name;
 
@@ -147,7 +150,7 @@ public class TypeService : IDisposable
         }
     }
 
-    public EfCoreContextDefinitions GetEfCore()
+    public DBRepositoryDefinitions GetEfCore()
     {
         var efProject = FileHelper.GetEntityFrameworkCoreProjectDirectory(_solutionDir);
 
@@ -171,7 +174,45 @@ public class TypeService : IDisposable
 
             var findType = findTypes.First();
 
-            return new EfCoreContextDefinitions
+            return new DBRepositoryDefinitions
+            {
+                TypeName = findType.Name,
+                TypeNamespace = findType.Namespace,
+                TypeFullName = findType.FullName,
+                FileDirectoryName = csFile.DirectoryName,
+            };
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    public DBRepositoryDefinitions GetMongoDB()
+    {
+        var project = FileHelper.GetMongoDBProjectDirectory(_solutionDir);
+
+        try
+        {
+            var dllFile = project.EnumerateFiles("bin/**.MongoDB.dll", SearchOption.AllDirectories).FirstOrDefault();
+
+            if (dllFile == null)
+                throw new Exception("The dll not found. Please build project .");
+
+            var csFile = project.EnumerateFiles("*DbContext.cs", SearchOption.AllDirectories).FirstOrDefault();
+
+            var decompiler = GetDecompiler(dllFile.FullName);
+
+            var types = decompiler.TypeSystem.GetAllTypeDefinitions();
+
+            var findTypes = decompiler.TypeSystem.MainModule.TypeDefinitions.Where(x => x.FullName.EndsWith("DbContext"));
+
+            if (findTypes.Any() == false)
+                throw new Exception($"No dbcontext found.");
+
+            var findType = findTypes.First();
+
+            return new DBRepositoryDefinitions
             {
                 TypeName = findType.Name,
                 TypeNamespace = findType.Namespace,
@@ -419,7 +460,7 @@ public class TypeService : IDisposable
 
     public void Dispose()
     {
-        
+
     }
 }
 

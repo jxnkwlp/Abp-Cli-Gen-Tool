@@ -2,7 +2,7 @@
 
 namespace AbpProjectTools.Services;
 
-public class EfCoreContextDefinitions
+public class DBRepositoryDefinitions
 {
     public string TypeName { get; set; }
 

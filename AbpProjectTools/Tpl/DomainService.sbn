@@ -10,5 +10,10 @@ namespace {{type_namespace}};
 
 public class {{type_name}}Manager : DomainService
 {
+    private readonly I{{type_name}}Repository _{{type_name | camel_case}}Repository;
 
+    public {{type_name}}Manager(I{{type_name}}Repository {{type_name | camel_case}}Repository)
+    {
+        _{{type_name | camel_case}}Repository = {{type_name | camel_case}}Repository;
+    }
 }

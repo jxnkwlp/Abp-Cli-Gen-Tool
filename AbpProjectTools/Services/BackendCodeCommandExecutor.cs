@@ -109,7 +109,6 @@ public class BackendCodeCommandExecutor
         Display(options);
 
         var typeService = new TypeService(options.SluDir);
-
         var templateService = new TemplateService(options.Template);
 
         try
@@ -118,6 +117,7 @@ public class BackendCodeCommandExecutor
 
             var domainInfo = typeService.GetDomain(options.Name);
             var efInfo = typeService.GetEfCore();
+            var mongdbInfo = typeService.GetMongoDB();
 
             // file 1
             var fileContent = templateService.Render("DomainRepository", domainInfo);
@@ -126,13 +126,23 @@ public class BackendCodeCommandExecutor
             WriteFileContent(filePath, fileContent, options.Overwrite);
 
             // file 2 -- EfCore
-            fileContent = templateService.Render("EfCoreRepository", new { domain = domainInfo, ef = efInfo });
+            fileContent = templateService.Render("EfCoreRepository", new { domain = domainInfo, info = efInfo });
             filePath = Path.Combine(efInfo.FileDirectoryName, "Repositories", $"{domainInfo.TypeName}Repository.cs");
 
             WriteFileContent(filePath, fileContent, options.Overwrite);
 
             // file 3 -- MongoDb
-            // TODO
+            fileContent = templateService.Render("MongoDBRepository", new { domain = domainInfo, info = mongdbInfo });
+            filePath = Path.Combine(mongdbInfo.FileDirectoryName, "Repositories", $"{domainInfo.TypeName}Repository.cs");
+
+            WriteFileContent(filePath, fileContent, options.Overwrite);
+
+            // file 4 - DomainService
+            fileContent = templateService.Render("DomainService", domainInfo);
+
+            filePath = Path.Combine(domainInfo.FileDirectory, $"{domainInfo.TypeName}Manager.cs");
+
+            WriteFileContent(filePath, fileContent, false);
 
             Console.WriteLine("🎉🎉🎉 Done ".Pastel(Color.Green));
         }

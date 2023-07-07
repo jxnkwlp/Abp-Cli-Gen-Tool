@@ -23,7 +23,7 @@ public class {{type_name}} : EntityDto
     {{~if !is_list_request_type~}}
 {{~for item in domain.properties~}}
 {{~if !item.is_inherited~}}
-    public {{item.type_code}}{{item.is_nullable?"?":""}} {{item.name}} { get; set; }{{item.is_required ? " = null!;": ""}}
+    public virtual {{item.type_code}}{{item.is_nullable?"?":""}} {{item.name}} { get; set; }{{item.is_required ? " = null!;": ""}}
 {{~end~}}
 {{~end~}}
     {{~end~}}

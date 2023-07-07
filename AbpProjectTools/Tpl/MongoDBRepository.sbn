@@ -4,24 +4,25 @@ using System.Linq;
 using System.Linq.Dynamic.Core;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using Volo.Abp.Domain.Repositories.EntityFrameworkCore;
-using Volo.Abp.EntityFrameworkCore;
+using MongoDB.Driver;
+using MongoDB.Driver.Linq;
+using Volo.Abp.Domain.Repositories.MongoDB;
+using Volo.Abp.MongoDB;
 using {{domain.type_namespace}};
 
 namespace {{info.type_namespace}}.Repositories;
 
-public class {{domain.type_name}}Repository : EfCoreRepository<{{info.type_name}}, {{domain.type_name}}, {{domain.type_key}}>, I{{domain.type_name}}Repository
+public class {{domain.type_name}}Repository : MongoDbRepository<{{info.type_name}}, {{domain.type_name}}, {{domain.type_key}}>, I{{domain.type_name}}Repository
 {
-    public {{domain.type_name}}Repository(IDbContextProvider<{{info.type_name}}> dbContextProvider) : base(dbContextProvider)
+    public {{domain.type_name}}Repository(IMongoDbContextProvider<{{info.type_name}}> dbContextProvider) : base(dbContextProvider)
     {
     }
 
     public virtual async Task<long> CountAsync(string filter, CancellationToken cancellationToken = default)
     {
-        var dbset = await GetDbSetAsync();
+        var query = await GetMongoQueryableAsync();
 
-        return await dbset
+        return await query
             // TODO
             //.WhereIf(!string.IsNullOrEmpty(filter),  )
             .LongCountAsync(cancellationToken);
@@ -29,9 +30,9 @@ public class {{domain.type_name}}Repository : EfCoreRepository<{{info.type_name}
 
     public virtual async Task<List<{{domain.type_name}}>> GetListAsync(string filter, bool includeDetails = false, CancellationToken cancellationToken = default)
     {
-        var dbset = await GetDbSetAsync();
+        var query = await GetMongoQueryableAsync();
 
-        return await dbset
+        return await query
             // TODO
             //.IncludeIf(includeDetails, TODO )
             //.WhereIf(!string.IsNullOrEmpty(filter), TODO )
@@ -40,14 +41,16 @@ public class {{domain.type_name}}Repository : EfCoreRepository<{{info.type_name}
 
     public virtual async Task<List<{{domain.type_name}}>> GetPagedListAsync(int skipCount, int maxResultCount, string filter, string sorting, bool includeDetails = false, CancellationToken cancellationToken = default)
     {
-        var dbset = await GetDbSetAsync();
+        var query = await GetMongoQueryableAsync();
 
-        return await dbset
+        return await query
             // TODO
             //.IncludeIf(includeDetails, TODO )
             //.WhereIf(!string.IsNullOrEmpty(filter), TODO )
             .PageBy(skipCount, maxResultCount)
             .OrderBy(sorting ?? nameof({{domain.type_name}}.CreationTime) + " desc")
+            .As<IMongoQueryable<{{domain.type_name}}>>()
             .ToListAsync(cancellationToken);
-    } 
+    }
+
 }
