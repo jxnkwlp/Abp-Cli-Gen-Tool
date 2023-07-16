@@ -35,8 +35,8 @@ public static class FileHelper
         if (hostDir == null)
             hostDir = dir.EnumerateDirectories("*.HttpApi.Host", SearchOption.AllDirectories).FirstOrDefault();
 
-        if (hostDir == null)
-            throw new System.Exception($"The host project not found in '{root}'. ");
+        //if (hostDir == null)
+        //    throw new System.Exception($"The host project not found in '{root}'. ");
 
         return hostDir;
     }

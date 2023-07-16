@@ -119,6 +119,11 @@ public class BackendCodeCommandExecutor
             var efInfo = typeService.GetEfCore();
             var mongdbInfo = typeService.GetMongoDB();
 
+            if (efInfo == null && mongdbInfo == null)
+            {
+                throw new Exception("EntityFrameworkCore and MongoDB not found. Please check again or build project first.");
+            }
+
             // file 1
             var fileContent = templateService.Render("DomainRepository", domainInfo);
             var filePath = Path.Combine(domainInfo.FileDirectory, $"I{domainInfo.TypeName}Repository.cs");
@@ -126,16 +131,22 @@ public class BackendCodeCommandExecutor
             WriteFileContent(filePath, fileContent, options.Overwrite);
 
             // file 2 -- EfCore
-            fileContent = templateService.Render("EfCoreRepository", new { domain = domainInfo, info = efInfo });
-            filePath = Path.Combine(efInfo.FileDirectoryName, "Repositories", $"{domainInfo.TypeName}Repository.cs");
+            if (efInfo != null && Directory.Exists(efInfo.FileDirectoryName))
+            {
+                fileContent = templateService.Render("EfCoreRepository", new { domain = domainInfo, info = efInfo });
+                filePath = Path.Combine(efInfo.FileDirectoryName, "Repositories", $"{domainInfo.TypeName}Repository.cs");
 
-            WriteFileContent(filePath, fileContent, options.Overwrite);
+                WriteFileContent(filePath, fileContent, options.Overwrite);
+            }
 
             // file 3 -- MongoDb
-            fileContent = templateService.Render("MongoDBRepository", new { domain = domainInfo, info = mongdbInfo });
-            filePath = Path.Combine(mongdbInfo.FileDirectoryName, "Repositories", $"{domainInfo.TypeName}Repository.cs");
+            if (mongdbInfo != null && Directory.Exists(mongdbInfo.FileDirectoryName))
+            {
+                fileContent = templateService.Render("MongoDBRepository", new { domain = domainInfo, info = mongdbInfo });
+                filePath = Path.Combine(mongdbInfo.FileDirectoryName, "Repositories", $"{domainInfo.TypeName}Repository.cs");
 
-            WriteFileContent(filePath, fileContent, options.Overwrite);
+                WriteFileContent(filePath, fileContent, options.Overwrite);
+            }
 
             // file 4 - DomainService
             fileContent = templateService.Render("DomainService", domainInfo);

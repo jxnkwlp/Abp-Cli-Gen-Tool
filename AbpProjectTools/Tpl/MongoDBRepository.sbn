@@ -18,7 +18,7 @@ public class {{domain.type_name}}Repository : MongoDbRepository<{{info.type_name
     {
     }
 
-    public virtual async Task<long> CountAsync(string filter, CancellationToken cancellationToken = default)
+    public virtual async Task<long> GetCountAsync(string? filter, CancellationToken cancellationToken = default)
     {
         var query = await GetMongoQueryableAsync();
 
@@ -28,7 +28,7 @@ public class {{domain.type_name}}Repository : MongoDbRepository<{{info.type_name
             .LongCountAsync(cancellationToken);
     }
 
-    public virtual async Task<List<{{domain.type_name}}>> GetListAsync(string filter, bool includeDetails = false, CancellationToken cancellationToken = default)
+    public virtual async Task<List<{{domain.type_name}}>> GetListAsync(string? filter, bool includeDetails = false, CancellationToken cancellationToken = default)
     {
         var query = await GetMongoQueryableAsync();
 
@@ -39,7 +39,7 @@ public class {{domain.type_name}}Repository : MongoDbRepository<{{info.type_name
             .ToListAsync(cancellationToken);
     }
 
-    public virtual async Task<List<{{domain.type_name}}>> GetPagedListAsync(int skipCount, int maxResultCount, string filter, string sorting, bool includeDetails = false, CancellationToken cancellationToken = default)
+    public virtual async Task<List<{{domain.type_name}}>> GetPagedListAsync(int skipCount, int maxResultCount, string? filter, string? sorting = null, bool includeDetails = false, CancellationToken cancellationToken = default)
     {
         var query = await GetMongoQueryableAsync();
 

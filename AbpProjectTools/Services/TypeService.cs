@@ -39,14 +39,17 @@ public class TypeService : IDisposable
             resolver.AddSearchDirectory(item);
         }
 
-        var webBinDir = _hostProjectDirectory.GetDirectories("Debug", SearchOption.AllDirectories).FirstOrDefault();
-
-        if (webBinDir?.Exists == true)
+        if (_hostProjectDirectory != null)
         {
-            if (webBinDir.EnumerateDirectories().Any())
-                webBinDir = webBinDir.EnumerateDirectories().FirstOrDefault();
+            var webBinDir = _hostProjectDirectory.GetDirectories("Debug", SearchOption.AllDirectories).FirstOrDefault();
 
-            resolver.AddSearchDirectory(webBinDir.FullName);
+            if (webBinDir?.Exists == true)
+            {
+                if (webBinDir.EnumerateDirectories().Any())
+                    webBinDir = webBinDir.EnumerateDirectories().FirstOrDefault();
+
+                resolver.AddSearchDirectory(webBinDir.FullName);
+            }
         }
 
         // add nuget cache 
@@ -159,7 +162,7 @@ public class TypeService : IDisposable
             var efDllFile = efProject.EnumerateFiles("bin/**.EntityFrameworkCore.dll", SearchOption.AllDirectories).FirstOrDefault();
 
             if (efDllFile == null)
-                throw new Exception("The dll not found. Please build project .");
+                return null;
 
             var csFile = efProject.EnumerateFiles("*DbContext.cs", SearchOption.AllDirectories).FirstOrDefault();
 
@@ -197,7 +200,7 @@ public class TypeService : IDisposable
             var dllFile = project.EnumerateFiles("bin/**.MongoDB.dll", SearchOption.AllDirectories).FirstOrDefault();
 
             if (dllFile == null)
-                throw new Exception("The dll not found. Please build project .");
+                return null;
 
             var csFile = project.EnumerateFiles("*DbContext.cs", SearchOption.AllDirectories).FirstOrDefault();
 
