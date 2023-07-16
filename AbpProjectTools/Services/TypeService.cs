@@ -71,6 +71,9 @@ public class TypeService : IDisposable
 
         try
         {
+            if (domainProject == null)
+                throw new Exception($"The domain project not found in folder '{_solutionDir}'");
+
             var domainDllFile = domainProject.EnumerateFiles("bin/**.Domain.dll", SearchOption.AllDirectories).FirstOrDefault();
 
             if (domainDllFile == null)
@@ -159,6 +162,9 @@ public class TypeService : IDisposable
 
         try
         {
+            if (efProject == null)
+                throw new Exception($"The EntityFrameworkCore project not found in folder '{_solutionDir}'");
+
             var efDllFile = efProject.EnumerateFiles("bin/**.EntityFrameworkCore.dll", SearchOption.AllDirectories).FirstOrDefault();
 
             if (efDllFile == null)
@@ -197,6 +203,9 @@ public class TypeService : IDisposable
 
         try
         {
+            if (project == null)
+                return null;
+
             var dllFile = project.EnumerateFiles("bin/**.MongoDB.dll", SearchOption.AllDirectories).FirstOrDefault();
 
             if (dllFile == null)
@@ -235,6 +244,9 @@ public class TypeService : IDisposable
 
         try
         {
+            if (appContractProject == null)
+                throw new Exception($"The ApplicationContract project not found in folder '{_solutionDir}'");
+
             var dllFile = appContractProject.EnumerateFiles("bin/**.Application.Contracts.dll", SearchOption.AllDirectories).FirstOrDefault();
 
             if (dllFile == null)
@@ -276,6 +288,12 @@ public class TypeService : IDisposable
 
         try
         {
+            if (appContractProject == null)
+                throw new Exception($"The ApplicationContract project not found in folder '{_solutionDir}'");
+
+            if (apiProject == null)
+                throw new Exception($"The HttApi project not found in folder '{_solutionDir}'");
+
             var csFile = appContractProject.EnumerateFiles($"I{name}AppService.cs", SearchOption.AllDirectories).FirstOrDefault();
 
             var dllFile = appContractProject.EnumerateFiles("bin/**.Application.Contracts.dll", SearchOption.AllDirectories).FirstOrDefault();
@@ -330,6 +348,9 @@ public class TypeService : IDisposable
 
         try
         {
+            if (project == null)
+                throw new Exception($"The HttApi project not found in folder '{_solutionDir}'");
+
             var dllFile = project.EnumerateFiles("bin/**.HttpApi.dll", SearchOption.AllDirectories).FirstOrDefault();
 
             if (dllFile == null)

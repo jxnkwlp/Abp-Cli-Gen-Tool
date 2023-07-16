@@ -34,6 +34,9 @@ public class BackendCodeCommandExecutor
     {
         if (string.IsNullOrWhiteSpace(options.ProjectName))
             options.ProjectName = GetSolutionName(_solutionDir);
+
+        if (string.IsNullOrEmpty(options.ProjectName))
+            throw new Exception("The project can't be empty.");
     }
 
     public void GenerateAllCode(BackendAppServiceCodeGeneratorCommandOption options)
@@ -100,6 +103,7 @@ public class BackendCodeCommandExecutor
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message.Pastel(Color.Red));
+            Console.WriteLine(ex.ToString().Pastel(Color.SlateGray));
         }
     }
 
@@ -160,6 +164,7 @@ public class BackendCodeCommandExecutor
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message.Pastel(Color.Red));
+            Console.WriteLine(ex.ToString().Pastel(Color.SlateGray));
         }
     }
 
@@ -312,6 +317,7 @@ public class BackendCodeCommandExecutor
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message.Pastel(Color.Red));
+            Console.WriteLine(ex.ToString().Pastel(Color.SlateGray));
         }
     }
 
@@ -351,6 +357,7 @@ public class BackendCodeCommandExecutor
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message.Pastel(Color.Red));
+            Console.WriteLine(ex.ToString().Pastel(Color.SlateGray));
         }
     }
 
