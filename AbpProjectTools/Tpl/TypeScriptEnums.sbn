@@ -13,7 +13,7 @@
 {{~ if type.enum_names ~}}
 export enum {{type.name}} {
     {{~ for $v in type.enum_values ~}}
-    {{type.enum_names[for.index]}} = {{$v}},
+    {{type.enum_names[for.index]}} = {{ type.enum_value_as_inter ? $v: "'"+$v+"'"}},
     {{~end~}}
 }
 {{~else~}}

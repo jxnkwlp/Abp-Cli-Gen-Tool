@@ -70,8 +70,8 @@ public class GenerateTypeScriptCodeCommand : CommandBase
             var fileContent2 = templateService.Render("TypeScriptTypes", new
             {
                 projectName = options.ProjectName,
-                schames = apiInfo.Schames.OrderBy(x => x.Name).ToList(),
-                Count = apiInfo.Schames.Count,
+                schames = apiInfo.Schames.Where(x => !x.Enumerable).OrderBy(x => x.Name).ToList(),
+                Count = apiInfo.Schames.Where(x => !x.Enumerable).Count(),
                 Url = options.SwaggerUrl,
                 Debug = options.Debug,
                 ProjectName = options.ProjectName,
@@ -83,8 +83,8 @@ public class GenerateTypeScriptCodeCommand : CommandBase
             fileContent2 = templateService.Render("TypeScriptEnums", new
             {
                 projectName = options.ProjectName,
-                schames = apiInfo.Schames.OrderBy(x => x.Name).ToList(),
-                Count = apiInfo.Schames.Count,
+                schames = apiInfo.Schames.Where(x => x.Enumerable).OrderBy(x => x.Name).ToList(),
+                Count = apiInfo.Schames.Where(x => x.Enumerable).Count(),
                 Url = options.SwaggerUrl,
                 Debug = options.Debug,
                 ProjectName = options.ProjectName,

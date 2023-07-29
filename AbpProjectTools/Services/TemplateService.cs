@@ -133,4 +133,12 @@ public static class RenderHelperFunctions
         return new Pluralizer().Singularize(source);
     }
 
+    public static string ToLower(string source)
+    {
+        if (source == null)
+            return source;
+
+        return source.ToLower();
+    }
+
 }

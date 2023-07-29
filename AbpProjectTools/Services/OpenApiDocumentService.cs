@@ -155,6 +155,7 @@ public class OpenApiDocumentService
                 s.Enumerable = true;
                 s.EnumValues = item.Value.Enumeration?.ToList();
                 s.EnumNames = item.Value.EnumerationNames?.ToList();
+                s.EnumValueAsInter = item.Value.Type == JsonObjectType.Integer;
             }
             else
             {
@@ -284,6 +285,7 @@ public class OpenApiDocumentService
                 s.Enumerable = true;
                 s.EnumValues = item.Value.Enumeration?.ToList();
                 s.EnumNames = item.Value.EnumerationNames?.ToList();
+                s.EnumValueAsInter = item.Value.Type == JsonObjectType.Integer;
             }
             else
             {
