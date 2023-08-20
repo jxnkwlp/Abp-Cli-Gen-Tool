@@ -18,37 +18,39 @@ public class {{domain.type_name}}Repository : MongoDbRepository<{{info.type_name
     {
     }
 
-    public virtual async Task<long> GetCountAsync(string? filter, CancellationToken cancellationToken = default)
+    public virtual async Task<long> GetCountAsync(string? filter = null, CancellationToken cancellationToken = default)
     {
         var query = await GetMongoQueryableAsync();
 
         return await query
             // TODO
-            //.WhereIf(!string.IsNullOrEmpty(filter),  )
+            //.WhereIf(!string.IsNullOrEmpty(filter), x => x.Name.Contains(filter))
+            .As<IMongoQueryable<{{domain.type_name}}>>()
             .LongCountAsync(cancellationToken);
     }
 
-    public virtual async Task<List<{{domain.type_name}}>> GetListAsync(string? filter, bool includeDetails = false, CancellationToken cancellationToken = default)
+    public virtual async Task<List<{{domain.type_name}}>> GetListAsync(string? filter = null, bool includeDetails = false, CancellationToken cancellationToken = default)
     {
         var query = await GetMongoQueryableAsync();
 
         return await query
             // TODO
             //.IncludeIf(includeDetails, TODO )
-            //.WhereIf(!string.IsNullOrEmpty(filter), TODO )
+            //.WhereIf(!string.IsNullOrEmpty(filter), x => x.Name.Contains(filter))
+            .As<IMongoQueryable<{{domain.type_name}}>>()
             .ToListAsync(cancellationToken);
     }
 
-    public virtual async Task<List<{{domain.type_name}}>> GetPagedListAsync(int skipCount, int maxResultCount, string? filter, string? sorting = null, bool includeDetails = false, CancellationToken cancellationToken = default)
+    public virtual async Task<List<{{domain.type_name}}>> GetPagedListAsync(int skipCount, int maxResultCount, string? filter = null, string? sorting = null, bool includeDetails = false, CancellationToken cancellationToken = default)
     {
         var query = await GetMongoQueryableAsync();
 
         return await query
             // TODO
             //.IncludeIf(includeDetails, TODO )
-            //.WhereIf(!string.IsNullOrEmpty(filter), TODO )
-            .PageBy(skipCount, maxResultCount)
+            //.WhereIf(!string.IsNullOrEmpty(filter), x => x.Name.Contains(filter))
             .OrderBy(sorting ?? nameof({{domain.type_name}}.CreationTime) + " desc")
+            .PageBy(skipCount, maxResultCount)
             .As<IMongoQueryable<{{domain.type_name}}>>()
             .ToListAsync(cancellationToken);
     }

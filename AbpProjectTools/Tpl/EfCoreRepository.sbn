@@ -17,37 +17,37 @@ public class {{domain.type_name}}Repository : EfCoreRepository<{{info.type_name}
     {
     }
 
-    public virtual async Task<long> GetCountAsync(string? filter, CancellationToken cancellationToken = default)
+    public virtual async Task<long> GetCountAsync(string? filter = null, CancellationToken cancellationToken = default)
     {
         var dbset = await GetDbSetAsync();
 
         return await dbset
             // TODO
-            //.WhereIf(!string.IsNullOrEmpty(filter),  )
+            //.WhereIf(!string.IsNullOrEmpty(filter), x => x.Name.Contains(filter))
             .LongCountAsync(cancellationToken);
     }
 
-    public virtual async Task<List<{{domain.type_name}}>> GetListAsync(string? filter, bool includeDetails = false, CancellationToken cancellationToken = default)
+    public virtual async Task<List<{{domain.type_name}}>> GetListAsync(string? filter = null, bool includeDetails = false, CancellationToken cancellationToken = default)
     {
         var dbset = await GetDbSetAsync();
 
         return await dbset
             // TODO
             //.IncludeIf(includeDetails, TODO )
-            //.WhereIf(!string.IsNullOrEmpty(filter), TODO )
+            //.WhereIf(!string.IsNullOrEmpty(filter), x => x.Name.Contains(filter))
             .ToListAsync(cancellationToken);
     }
 
-    public virtual async Task<List<{{domain.type_name}}>> GetPagedListAsync(int skipCount, int maxResultCount, string? filter, string? sorting = null, bool includeDetails = false, CancellationToken cancellationToken = default)
+    public virtual async Task<List<{{domain.type_name}}>> GetPagedListAsync(int skipCount, int maxResultCount, string? filter = null, string? sorting = null, bool includeDetails = false, CancellationToken cancellationToken = default)
     {
         var dbset = await GetDbSetAsync();
 
         return await dbset
             // TODO
             //.IncludeIf(includeDetails, TODO )
-            //.WhereIf(!string.IsNullOrEmpty(filter), TODO )
-            .PageBy(skipCount, maxResultCount)
+            //.WhereIf(!string.IsNullOrEmpty(filter), x => x.Name.Contains(filter))
             .OrderBy(sorting ?? nameof({{domain.type_name}}.CreationTime) + " desc")
+            .PageBy(skipCount, maxResultCount)
             .ToListAsync(cancellationToken);
     } 
 }
