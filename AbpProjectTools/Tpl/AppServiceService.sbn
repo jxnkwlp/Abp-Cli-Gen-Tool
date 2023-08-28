@@ -71,6 +71,8 @@ public class {{domain.type_name}}AppService : CrudAppService<{{domain.type_name}
             {{~end~}}
         };
 
+        input.MapExtraPropertiesTo(entity);
+
         await _{{domain.type_name | camel_case}}Repository.InsertAsync(entity);
 
         return ObjectMapper.Map<{{domain.type_name}}, {{domain.type_name}}Dto>(entity);
@@ -89,6 +91,8 @@ public class {{domain.type_name}}AppService : CrudAppService<{{domain.type_name}
         entity.{{item.name}} = input.{{item.name}};
         {{~end~}}
         {{~end~}}
+
+        input.MapExtraPropertiesTo(entity);
 
         await _{{domain.type_name | camel_case}}Repository.UpdateAsync(entity);
 
