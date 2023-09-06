@@ -144,7 +144,7 @@ public class TypeService : IDisposable
                 TypeNamespace = findType.Namespace,
                 FileDirectory = csFile.DirectoryName,
                 FileFullName = csFile.FullName,
-                FileProjectPath = csFile.DirectoryName.Substring(domainProject.FullName.Length + 1),
+                FileProjectPath = csFile.DirectoryName == domainProject.FullName ? "" : csFile.DirectoryName.Substring(domainProject.FullName.Length + 1),
                 Properties = typeProperties,
                 ConstructorWithId = hasConstructorWithId,
                 PropertyNamespaces = typeNamespaces,
@@ -332,7 +332,7 @@ public class TypeService : IDisposable
                 ServiceName = appServiceType.Name[1..],
                 Name = appServiceType.Name[1..].Replace("AppService", null),
                 Namespace = appServiceType.Namespace,
-                FileProjectPath = csFile.DirectoryName.Substring(appContractProject.FullName.Length + 1),
+                FileProjectPath = csFile.DirectoryName == appContractProject.FullName ? "" : csFile.DirectoryName.Substring(appContractProject.FullName.Length + 1),
                 Methods = methods.ToList(),
             };
         }
