@@ -12,6 +12,7 @@ using {{item}};
 
 namespace {{app_service.namespace}};
 
+// [Area({{projectName}}RemoteServiceConsts.RemoteServiceName)]
 [RemoteService]
 [Route("api/{{app_service.name | to_slug_string | to_pluralize }}")]
 public class {{app_service.name}}Controller : {{base_controller}}, I{{app_service.name}}AppService
@@ -25,6 +26,7 @@ public class {{app_service.name}}Controller : {{base_controller}}, I{{app_servic
 
 {{~for item in app_service.methods~}}
 {{~if !item.is_inherited~}}
+    /// <inheritdoc/>
     [{{routes[item.name].method}}({{routes[item.name].url ? "\""+routes[item.name].url+"\"" : "" }})]
     public virtual {{item.type}} {{~item.type_arguments.size>0?"<":"" ~}}
 {{-for p in item.type_arguments-}}

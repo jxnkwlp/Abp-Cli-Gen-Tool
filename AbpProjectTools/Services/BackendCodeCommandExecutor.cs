@@ -343,7 +343,7 @@ public class BackendCodeCommandExecutor
             {
                 Namespaces = httpControllerDefinition.ImportNamespaces,
                 BaseController = httpControllerDefinition.BaseControllerType,
-                // projectName = options.ProjectName,
+                projectName = options.ProjectName,
                 appService = appServiceInfo,
                 routes = GenerateRoute(appServiceInfo.Methods),
             });
