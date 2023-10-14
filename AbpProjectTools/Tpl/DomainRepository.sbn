@@ -8,10 +8,13 @@ namespace {{type_namespace}};
 
 public interface I{{type_name}}Repository : IRepository<{{type_name}}, {{type_key}}>
 {
-    Task<long> GetCountAsync(string? filter, CancellationToken cancellationToken = default);
+    Task<long> GetCountAsync(string? filter = null, CancellationToken cancellationToken = default);
 
-    Task<List<{{type_name}}>> GetListAsync(string? filter, bool includeDetails = false, CancellationToken cancellationToken = default);
+    Task<List<{{type_name}}>> GetListAsync(string? filter = null, bool includeDetails = false, CancellationToken cancellationToken = default);
 
-    Task<List<{{type_name}}>> GetPagedListAsync(int skipCount, int maxResultCount, string? filter, string? sorting = null, bool includeDetails = false, CancellationToken cancellationToken = default);
+    Task<List<{{type_name}}>> GetPagedListAsync(int skipCount, int maxResultCount, string? filter = null, string? sorting = null, bool includeDetails = false, CancellationToken cancellationToken = default);
 
+    // Task<bool> IsNameExistsAsync(string name, Guid[] excludeIds = null, CancellationToken cancellationToken = default);
+    // Task<{{type_name}}> GetByNameAsync(string name, CancellationToken cancellationToken = default);
+    // Task<{{type_name}}?> FindByNameAsync(string name, CancellationToken cancellationToken = default);
 }

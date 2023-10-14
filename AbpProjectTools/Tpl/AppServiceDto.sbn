@@ -9,7 +9,7 @@ using {{item}};
 namespace {{domain.type_namespace}};
 
 {{~if is_list_request_type~}}
-public class {{type_name}} : PagedResultRequestDto
+public class {{type_name}} : PagedAndSortedResultRequestDto
 {{~else if is_list_result_type~}}
 public class {{type_name}} : EntityDto<{{domain.type_key}}>
 {{~else if is_create_type || is_update_type ~}}
@@ -20,7 +20,9 @@ public class {{type_name}} : AuditedEntityDto<{{domain.type_key}}>
 public class {{type_name}} : EntityDto
 {{~end~}}
 {
-    {{~if !is_list_request_type~}}
+    {{~if is_list_request_type~}}
+    public virtual string? Filter { get; set; }
+    {{~else~}}
 {{~for item in domain.properties~}}
 {{~if !item.is_inherited~}}
     public virtual {{item.type_code}}{{item.is_nullable?"?":""}} {{item.name}} { get; set; }{{item.is_required ? " = null!;": ""}}

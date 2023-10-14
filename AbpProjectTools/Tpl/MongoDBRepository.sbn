@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using MongoDB.Driver;
 using MongoDB.Driver.Linq;
 using Volo.Abp.Domain.Repositories.MongoDB;
+using Volo.Abp.Domain.Entities;
 using Volo.Abp.MongoDB;
 using {{domain.type_namespace}};
 
@@ -17,6 +18,22 @@ public class {{domain.type_name}}Repository : MongoDbRepository<{{info.type_name
     public {{domain.type_name}}Repository(IMongoDbContextProvider<{{info.type_name}}> dbContextProvider) : base(dbContextProvider)
     {
     }
+
+    // public virtual async Task<{{domain.type_name}}> FindByNameAsync(string name, CancellationToken cancellationToken = default)
+    // {
+    //     var query = await GetMongoQueryableAsync();
+    // 
+    //     return await query.FirstOrDefaultAsync(x => x.Name == name, cancellationToken: cancellationToken);
+    // }
+    
+    // public virtual async Task<{{domain.type_name}}> GetByNameAsync(string name, CancellationToken cancellationToken = default)
+    // {
+    //     var query = await GetMongoQueryableAsync();
+    // 
+    //     var entity = await query.FirstOrDefaultAsync(x => x.Name == name, cancellationToken: cancellationToken);
+    // 
+    //     return entity ?? throw new EntityNotFoundException(typeof({{domain.type_name}}));
+    // }
 
     public virtual async Task<long> GetCountAsync(string? filter = null, CancellationToken cancellationToken = default)
     {
@@ -55,4 +72,13 @@ public class {{domain.type_name}}Repository : MongoDbRepository<{{info.type_name
             .ToListAsync(cancellationToken);
     }
 
+    // public virtual async Task<bool> IsNameExistsAsync(string name, Guid[] excludeIds = null, CancellationToken cancellationToken = default)
+    // {
+    //     var query = await GetMongoQueryableAsync();
+    // 
+    //     return await query
+    //         .WhereIf(excludeIds?.Any() == true, x => !excludeIds.Contains(x.Id))
+    //         .As<IMongoQueryable<{{domain.type_name}}>>()
+    //         .AnyAsync(x => x.Name == name, cancellationToken: cancellationToken);
+    // }
 }

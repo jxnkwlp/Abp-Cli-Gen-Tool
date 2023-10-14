@@ -36,8 +36,8 @@ public class {{domain.type_name}}AppService : CrudAppService<{{domain.type_name}
     public virtual async Task<PagedResultDto<{{domain.type_name}}Dto>> GetListAsync({{list_request_type_name}} input)
     {{~end~}}
     {
-        var count = await _{{domain.type_name | camel_case}}Repository.GetCountAsync();
-        var list = await _{{domain.type_name | camel_case}}Repository.GetPagedListAsync(input.SkipCount, input.MaxResultCount, nameof({{domain.type_name}}.CreationTime) + " desc");
+        var count = await _{{domain.type_name | camel_case}}Repository.GetCountAsync(filter: input.Filter);
+        var list = await _{{domain.type_name | camel_case}}Repository.GetPagedListAsync(input.SkipCount, input.MaxResultCount, filter: input.Filter, sorting: input.Sorting);
 
         return new PagedResultDto<{{list_result_type_name}}>()
         {
