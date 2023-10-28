@@ -6,7 +6,8 @@
         <PackAsTool>true</PackAsTool>
         <ToolCommandName>abptool</ToolCommandName>
         <PackageId>Passingwind.$(AssemblyName)</PackageId>
-        <Version>0.5.0</Version>
+        <AssemblyVersion>0.6.0</AssemblyVersion>
+        <Version>0.6.0</Version>
         <Authors>Passingwind</Authors>
         <Copyright>Passingwind</Copyright>
         <PackageProjectUrl>https://github.com/jxnkwlp/Abp-Cli-Gen-Tool</PackageProjectUrl>
