@@ -11,13 +11,13 @@ namespace {{domain.type_namespace}};
 {{~if is_list_request_type~}}
 public class {{type_name}} : PagedAndSortedResultRequestDto
 {{~else if is_list_result_type~}}
-public class {{type_name}} : EntityDto<{{domain.type_key}}>
+public class {{type_name}} : ExtensibleEntityDto<{{domain.type_key}}>
 {{~else if is_create_type || is_update_type ~}}
-public class {{type_name}}
+public class {{type_name}} : ExtensibleEntityDto
 {{~else if is_entity_type~}}
-public class {{type_name}} : AuditedEntityDto<{{domain.type_key}}>
+public class {{type_name}} : ExtensibleAuditedEntityDto<{{domain.type_key}}>
 {{~else}}
-public class {{type_name}} : EntityDto
+public class {{type_name}} : ExtensibleEntityDto
 {{~end~}}
 {
     {{~if is_list_request_type~}}

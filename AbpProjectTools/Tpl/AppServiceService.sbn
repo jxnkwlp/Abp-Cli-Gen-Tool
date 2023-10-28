@@ -4,9 +4,13 @@ using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
 using Volo.Abp.Domain.Repositories;
+using Volo.Abp.ObjectExtending;
 
 namespace {{domain.type_namespace}};
 
+/// <summary>
+///  Application service for {{domain.type_name}}
+/// </summary>
 {{~if basic_service || !crud~}}
 public class {{domain.type_name}}AppService : {{project_name}}AppService, I{{domain.type_name}}AppService
 {{~else if split_list_type~}}
@@ -30,6 +34,7 @@ public class {{domain.type_name}}AppService : CrudAppService<{{domain.type_name}
         _{{domain.type_name | camel_case}}Repository = {{domain.type_name| camel_case}}Repository;
     }
 
+    /// <inheritdoc/>
     {{~ if split_list_type ~}}
     public virtual async Task<PagedResultDto<{{list_result_type_name}}>> GetListAsync({{list_request_type_name}} input)
     {{~else~}}
@@ -46,6 +51,7 @@ public class {{domain.type_name}}AppService : CrudAppService<{{domain.type_name}
         };
     }
 
+    /// <inheritdoc/>
     public virtual async Task<{{domain.type_name}}Dto> GetAsync({{domain.type_key}} id)
     {
         var entity = await _{{domain.type_name | camel_case}}Repository.GetAsync(id);
@@ -53,6 +59,7 @@ public class {{domain.type_name}}AppService : CrudAppService<{{domain.type_name}
         return ObjectMapper.Map<{{domain.type_name}}, {{domain.type_name}}Dto>(entity);
     }
 
+    /// <inheritdoc/>
     public virtual async Task<{{domain.type_name}}Dto> CreateAsync({{create_type_name}} input)
     {
         // TODO: Review
@@ -71,11 +78,14 @@ public class {{domain.type_name}}AppService : CrudAppService<{{domain.type_name}
             {{~end~}}
         };
 
+        input.MapExtraPropertiesTo(entity);
+
         await _{{domain.type_name | camel_case}}Repository.InsertAsync(entity);
 
         return ObjectMapper.Map<{{domain.type_name}}, {{domain.type_name}}Dto>(entity);
     }
 
+    /// <inheritdoc/>
     public virtual async Task<{{domain.type_name}}Dto> UpdateAsync({{domain.type_key}} id, {{update_type_name}} input)
     {
         // TODO: Review
@@ -90,11 +100,14 @@ public class {{domain.type_name}}AppService : CrudAppService<{{domain.type_name}
         {{~end~}}
         {{~end~}}
 
+        input.MapExtraPropertiesTo(entity);
+
         await _{{domain.type_name | camel_case}}Repository.UpdateAsync(entity);
 
         return ObjectMapper.Map<{{domain.type_name}}, {{domain.type_name}}Dto>(entity);
     }
 
+    /// <inheritdoc/>
     public virtual async Task DeleteAsync({{domain.type_key}} id)
     {
         await _{{domain.type_name | camel_case}}Repository.DeleteAsync(id);
