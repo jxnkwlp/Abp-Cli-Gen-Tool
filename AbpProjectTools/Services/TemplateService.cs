@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Text;
+using Humanizer;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using Pluralize.NET;
@@ -141,4 +142,35 @@ public static class RenderHelperFunctions
         return source.ToLower();
     }
 
+    public static string ToTitle(string source)
+    {
+        if (source == null)
+            return source;
+
+        return source.Humanize(LetterCasing.Title);
+    }
+
+    public static string ToDehumanize(string source)
+    {
+        if (source == null)
+            return source;
+
+        return source.Dehumanize();
+    }
+
+    public static string ToPascalize(string source)
+    {
+        if (source == null)
+            return source;
+
+        return source.Pascalize();
+    }
+
+    public static string ToCamelize(string source)
+    {
+        if (source == null)
+            return source;
+
+        return source.Camelize();
+    }
 }

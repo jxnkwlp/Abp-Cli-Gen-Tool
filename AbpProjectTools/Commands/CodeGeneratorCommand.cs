@@ -16,11 +16,8 @@ public class CodeGeneratorCommand : CommandBase
         // backend
         command.AddCommand(new BackendCodeGeneratorCommand().GetCommand());
 
-        // fontend
-        var fontendCommand = new Command("fontend", "Generate ts type and service code");
-        fontendCommand.AddCommand(new GenerateTypeScriptCodeCommand().GetCommand());
-
-        command.AddCommand(fontendCommand);
+        // fontend 
+        command.AddCommand(new FontendCodeGeneratorCommand().GetCommand());
 
         return command;
     }

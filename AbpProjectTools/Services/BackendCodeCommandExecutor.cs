@@ -429,6 +429,10 @@ public class BackendCodeCommandExecutor
                     .Replace("Get", null)
                     .Replace("Load", null);
             }
+            else
+            {
+                urlpath = RenderHelperFunctions.ToPluralize(RenderHelperFunctions.ToSlugString(item.Name.Replace("Async", null)));
+            }
 
             if (urlpath != null)
             {
@@ -442,15 +446,20 @@ public class BackendCodeCommandExecutor
             if (item.Params?.Any() == true)
             {
                 List<string> nps = new List<string>();
+                string tmp = string.Empty;
                 foreach (var p in item.Params)
                 {
                     if (p.Name.EndsWith("Id", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        if (!string.IsNullOrEmpty(urlpath))
-                            urlpath += "/";
-                        urlpath += "{" + RenderHelperFunctions.CamelCase(p.Name) + "}";
+                        tmp = "{" + RenderHelperFunctions.CamelCase(p.Name) + "}/" + tmp;
+                    }
+                    else
+                    {
+                        tmp = tmp + "/{" + RenderHelperFunctions.CamelCase(p.Name) + "}";
                     }
                 }
+
+                urlpath += tmp;
             }
 
             if (string.IsNullOrEmpty(urlpath))

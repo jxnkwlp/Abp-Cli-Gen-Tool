@@ -1,0 +1,12 @@
+﻿{{~ func output_params (name, params) ~}}
+    {{~ for $item in params ~}}
+    'page.{{name | camel_case}}.field.{{$item.name | camel_case}}': '{{$item.name | to_title}}',
+    {{~ if $item.object_definition != null ~}}
+    {{~ output_params $item.reference_object_name $item.object_definition.params ~}} 
+    {{~end~}}
+    {{~ end ~}}
+{{~ end ~}}
+export default {
+    'page.{{name | camel_case}}': '{{name | to_title}}',
+    {{~ output_params name all_fields ~}} 
+};

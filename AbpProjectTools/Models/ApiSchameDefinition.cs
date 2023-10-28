@@ -17,6 +17,11 @@ public class ApiSchameDefinition : IEquatable<ApiSchameDefinition>
 
     public IList<ApiParamItem> Params { get; set; }
 
+    public override string ToString()
+    {
+        return Name;
+    }
+
     public override bool Equals(object obj)
     {
         return Equals(obj as ApiSchameDefinition);

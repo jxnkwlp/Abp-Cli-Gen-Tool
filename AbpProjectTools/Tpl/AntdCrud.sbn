@@ -1,0 +1,214 @@
+﻿import { API } from '@/services/typings';
+import {
+    ActionType,
+    ModalForm,
+    PageContainer,
+    ProFormDigit,
+    ProFormSelect,
+    ProFormSwitch,
+    ProFormText,
+    ProFormTextArea,
+    ProFormDatePicker,
+    ProTable,
+} from '@ant-design/pro-components';
+import { formatMessage, useIntl, useAccess } from '@umijs/max';
+import { Button, Card, Popconfirm, message } from 'antd';
+import React, { useEffect, useRef, useState } from 'react';
+
+const handle{{name | to_pascalize }}Add = async (data: any) => {
+    const response = await create{{name | to_pascalize }}(data);
+    if (response) {
+        message.success(formatMessage({ id: 'common.dict.created.success' }));
+        return true;
+    }
+    return false;
+};
+
+const handle{{name | to_pascalize }}Edit = async (id: string, data: any) => {
+    const response = await update{{name | to_pascalize }}(id, data);
+    if (response) {
+        message.success(formatMessage({ id: 'common.dict.modified.success' }));
+        return true;
+    }
+    return false;
+};
+
+const handle{{name | to_pascalize }}Delete = async (id: string) => {
+    const response = await delete{{name | to_pascalize }}(id);
+    if (response) {
+        message.success(formatMessage({ id: 'common.dict.deleted.success' }));
+        return true;
+    }
+    return false;
+};
+
+const {{name | to_pascalize }}: React.FC = () => {
+    const intl = useIntl();
+    const access = useAccess();
+
+    const tableActionRef = useRef<ActionType>();
+
+    const [loading, setLoading] = useState<boolean>(false);
+
+    {{~ if gen_create_or_update ~}}
+    const [editModalVisible, setEditModalVisible] = useState<boolean>(false);
+    const [editModalTitle, setEditModalTitle] = useState<string>('');
+    const [editModalData, setEditModalData] = useState<API.{{name | to_pascalize }}>();
+    const [editModalDataId, setEditModalDataId] = useState<string>();
+    {{~ end ~}}
+
+    return (
+        <PageContainer>
+            <Card>
+                <ProTable<API.{{name | to_pascalize }}>
+                    actionRef={tableActionRef}
+                    columns={[
+                        {{~ for schame in default_fields ~}}
+                        {
+                            dataIndex: '{{schame.name}}',
+                            title: intl.formatMessage({ id: 'page.{{name | camel_case}}.field.{{schame.name | camel_case}}' }),
+                            search: false
+                        },
+                        {{~end~}}
+                        {
+                            title: intl.formatMessage({ id: 'common.dict.table-action' }),
+                            valueType: 'option',
+                            align: 'center',
+                            width: 80,
+                            render: (text, record, _, action) => [
+                            {{~ if gen_create_or_update ~}}
+                                <a
+                                    key="edit"
+                                    onClick={() => {
+                                        setEditModalData(record);
+                                        setEditModalDataId(record.id);
+                                        setEditModalVisible(true);
+                                        setEditModalTitle(`${intl.formatMessage({ id: 'common.dict.edit' })} - ${record.name}`);
+                                    }}
+                                >
+                                    {intl.formatMessage({ id: 'common.dict.edit' })}
+                                </a>,
+                             {{~ end ~}}
+                                <Popconfirm
+                                    key="delete"
+                                    title={intl.formatMessage({ id: 'common.dict.delete.confirm' })}
+                                    onConfirm={async () => {
+                                        if (await handle{{name | to_pascalize }}Delete(record.id)) {
+                                            action?.reload();
+                                        }
+                                    }}
+                                >
+                                    <a>{intl.formatMessage({ id: 'common.dict.delete' })}</a>
+                                </Popconfirm>,
+                            ],
+                        },
+                    ]}
+                    rowKey="id"
+                    toolBarRender={() => [
+                    {{~ if gen_create_or_update ~}}
+                        <Button
+                            key="add"
+                            type="primary"
+                            onClick={() => {
+                                setEditModalData(undefined);
+                                setEditModalDataId('');
+                                setEditModalTitle(intl.formatMessage({ id: 'common.dict.create' }));
+                                setEditModalVisible(true);
+                            }}
+                        >
+                            {intl.formatMessage({ id: 'common.dict.create' })}
+                        </Button>,
+                    {{~ end ~}}
+                    ]}
+                    request={async (params) => {
+                        const { current, pageSize } = params;
+                        delete params.current;
+                        delete params.pageSize;
+                        const skipCount = (current! - 1) * pageSize!;
+                        const result = await get{{name | to_pascalize }}List({
+                            ...params,
+                            skipCount,
+                            maxResultCount: pageSize,
+                        });
+                        if (result)
+                            return {
+                                success: true,
+                                data: result.items,
+                                total: result.totalCount,
+                            };
+                        else {
+                            return {
+                                success: false,
+                            };
+                        }
+                    }}
+                />
+            </Card>
+
+            {{~ if gen_create_or_update ~}} 
+            {/* '{{name | to_title}}' Create/Update */}
+            <ModalForm
+                title={editModalTitle}
+                width={580}
+                open={editModalVisible}
+                modalProps={%{{{ destroyOnClose: true, maskClosable: false }}}%}
+                onOpenChange={setEditModalVisible}
+                initialValues={editModalData}
+                request={async () => {
+                    if (!editModalDataId) return {};
+                    return await get{{name | to_pascalize }}(editModalDataId);
+                }}
+                onFinish={async (value) => {
+                    let success = false;
+                    // @ts-nocheck
+                    const data = { ...value };
+                    if (editModalDataId) {
+                        success = await handle{{name | to_pascalize }}Edit(editModalDataId, data);
+                    } else {
+                        success = await handle{{name | to_pascalize }}Add(data);
+                    }
+
+                    if(success){
+                        tableActionRef?.current?.reload();
+                    }
+
+                    return success;
+                }}
+                layout="horizontal"
+                labelCol={%{{{ span: 6 }}}%}
+                labelWrap
+            >
+{{~ func output_params (names, params) ~}}
+    {{~ for schame in params ~}}
+                {{~if schame.type == 2 ~}}
+                <ProFormDigit
+                {{~else if schame.type == 3 ~}}
+                <ProFormDatePicker
+                {{~else if schame.type == 4 ~}}
+                <ProFormSwitch
+                {{~else~}}
+                <ProFormText
+                {{~end~}}
+                    rules={[
+                        { required: {{schame.required?'true':'false'}} },
+                        {{~ if schame.max_length >=0 ~}}
+                        { max: {{schame.max_length}} },
+                        {{~ end ~}}
+                    ]}
+                    name={['{{schame.name}}']}
+                    label={intl.formatMessage({ id: 'page.{{name | camel_case}}.field.{{schame.name | camel_case}}' })}
+                />
+
+    {{~ if schame.object_definition != null ~}}
+    {{~ output_params names schame.object_definition.params ~}} 
+    {{~end~}}
+    {{~ end ~}}
+{{~ end ~}}
+                {{~ output_params name edit_fields~}}
+            </ModalForm>
+            {{~ end ~}}
+        </PageContainer>
+    );
+};
+
+export default {{name | to_pascalize }};

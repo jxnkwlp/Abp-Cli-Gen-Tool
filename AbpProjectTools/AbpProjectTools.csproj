@@ -17,20 +17,21 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Remove="Commands\GenerateAppServiceCodeCommand.cs" />
-      <Compile Remove="Commands\GenerateDomainServiceCodeCommand.cs" />
-      <Compile Remove="Commands\GenerateHttpControllerCodeCommand.cs" />
-      <Compile Remove="Commands\GenerateRepositoryCodeCommand.cs" />
+        <Compile Remove="Commands\GenerateAppServiceCodeCommand.cs" />
+        <Compile Remove="Commands\GenerateDomainServiceCodeCommand.cs" />
+        <Compile Remove="Commands\GenerateHttpControllerCodeCommand.cs" />
+        <Compile Remove="Commands\GenerateRepositoryCodeCommand.cs" />
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="NSwag.Core" Version="13.19.0" />
+        <PackageReference Include="NSwag.Core" Version="13.20.0" />
         <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.21308.1" />
-        <PackageReference Include="ICSharpCode.Decompiler" Version="8.0.0.7345" />
-        <PackageReference Include="Scriban" Version="5.7.0" />
+        <PackageReference Include="ICSharpCode.Decompiler" Version="8.1.1.7464" />
+        <PackageReference Include="Scriban" Version="5.9.0" />
         <PackageReference Include="NJsonSchema.CodeGeneration.TypeScript" Version="10.9.0" />
-        <PackageReference Include="Pastel" Version="4.1.0" />
+        <PackageReference Include="Pastel" Version="4.2.0" />
         <PackageReference Include="Pluralize.NET" Version="1.0.2" />
+        <PackageReference Include="Humanizer" Version="2.14.1" />
     </ItemGroup>
 
     <ItemGroup>

@@ -7,11 +7,11 @@ using AbpProjectTools.Services;
 
 namespace AbpProjectTools.Commands;
 
-public class GenerateTypeScriptCodeCommand : CommandBase
+public class FontendServiceCodeGeneratorCommand : CommandBase
 {
     public override Command GetCommand()
     {
-        var command = new Command("ts", "Generate ts types and services code base on swagger json document");
+        var command = new Command("service", "Generate ts types and services code base on swagger json document");
 
         command.AddOption(new Option<string>("--swagger-url", "The swagger api json document url") { IsRequired = true, });
         command.AddOption(new Option<string>(new[] { "--output", "-o" }, "") { IsRequired = true, });
@@ -25,7 +25,7 @@ public class GenerateTypeScriptCodeCommand : CommandBase
 
         var helper = new OpenApiDocumentService();
 
-        command.Handler = CommandHandler.Create<GenerateTypeScriptCodeCommandOptions>(async options =>
+        command.Handler = CommandHandler.Create<FontendServiceCodeGeneratorCommandOptions>(async options =>
         {
             var templateService = new TemplateService(options.Templates);
 
@@ -99,7 +99,7 @@ public class GenerateTypeScriptCodeCommand : CommandBase
     }
 }
 
-public class GenerateTypeScriptCodeCommandOptions
+public class FontendServiceCodeGeneratorCommandOptions
 {
     public string SwaggerUrl { get; set; }
     public string Templates { get; set; }

@@ -344,6 +344,7 @@ public class OpenApiDocumentService
                 Description = prop.Value.Description,
                 Required = prop.Value.IsRequired, //.IsNullableRaw == true ? false : true,
                 Nullable = !prop.Value.IsRequired,
+                MaxLength = prop.Value.MaxLength,
                 Format = prop.Value.Format,
             };
 
@@ -357,6 +358,7 @@ public class OpenApiDocumentService
             {
                 p.Type = ApiParamType.Object;
                 p.TypeLiteral = FormatTypeName(prop.Value.Reference.Title ?? "any");
+                p.ReferenceObjectName = prop.Value.Reference.Title;
             }
             else
             {
@@ -366,6 +368,7 @@ public class OpenApiDocumentService
                     if (arrayItem.HasReference)
                     {
                         p.TypeLiteral = FormatTypeName(arrayItem.Reference.Title);
+                        p.ReferenceObjectName = p.TypeLiteral;
                     }
                     else if (arrayItem.Type == JsonObjectType.None)
                     {
@@ -383,12 +386,14 @@ public class OpenApiDocumentService
                     {
                         p.Type = ApiParamType.CompositeObject;
                         p.TypeLiteral = FormatTypeName(prop.Value.AdditionalPropertiesSchema.Reference.Title);
+                        p.ReferenceObjectName = p.TypeLiteral;
                     }
                 }
                 else if (prop.Value.ActualTypeSchema != null && prop.Value.HasOneOfSchemaReference)
                 {
                     p.Type = ApiParamType.Object;
                     p.TypeLiteral = FormatTypeName(prop.Value.ActualTypeSchema.Title);
+                    p.ReferenceObjectName = p.TypeLiteral;
                 }
                 else if (p.Type == ApiParamType.Object && string.IsNullOrEmpty(p.TypeLiteral))
                 {
