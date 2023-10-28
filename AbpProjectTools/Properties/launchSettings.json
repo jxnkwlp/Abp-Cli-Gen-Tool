@@ -1,9 +1,0 @@
-{
-  "profiles": {
-    "AbpProjectTools": {
-      "commandName": "Project",
-      "commandLineArgs": "gen backend http-controller --slu-dir \"F:\\repos\\abp-admin-template\" --name Test",
-      "remoteDebugEnabled": false
-    }
-  }
-}

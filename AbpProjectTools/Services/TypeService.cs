@@ -309,7 +309,7 @@ public class TypeService : IDisposable
                 throw new Exception($"The application contracts class 'I{name}AppService' of type '{name}' of  not found.");
 
             var methodTypes = appServiceType.GetMethods();
-            var methods = methodTypes.Select(x => new TypeMethodInfo
+            var methods = methodTypes.Where(x => !x.IsStatic && !x.Namespace.StartsWith("System")).Select(x => new TypeMethodInfo
             {
                 Name = x.Name,
                 Type = x.ReturnType.Name,
@@ -324,6 +324,7 @@ public class TypeService : IDisposable
                     Type = p.Type.Name,
                     TypeCode = GetTypeCodeString(p.Type),
                     IsNullable = p.Type.Nullability == Nullability.Nullable,
+                    IsClass = !p.Type.FullName.StartsWith("System.")
                 }).ToList(),
             });
 

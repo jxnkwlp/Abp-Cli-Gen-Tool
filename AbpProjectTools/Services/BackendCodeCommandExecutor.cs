@@ -447,19 +447,21 @@ public class BackendCodeCommandExecutor
             {
                 List<string> nps = new List<string>();
                 string tmp = string.Empty;
-                foreach (var p in item.Params)
+
+                if (item.Params.Any(x => x.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase)))
                 {
-                    if (p.Name.EndsWith("Id", StringComparison.InvariantCultureIgnoreCase))
-                    {
-                        tmp = "{" + RenderHelperFunctions.CamelCase(p.Name) + "}/" + tmp;
-                    }
-                    else
-                    {
-                        tmp = tmp + "/{" + RenderHelperFunctions.CamelCase(p.Name) + "}";
-                    }
+                    nps.Add("{id}");
                 }
 
-                urlpath += tmp;
+                if (!string.IsNullOrEmpty(urlpath))
+                    nps.Add(urlpath);
+
+                foreach (var p in item.Params.Where(x => !x.IsClass && !x.Name.Equals("Id", StringComparison.InvariantCultureIgnoreCase)))
+                {
+                    nps.Add("{" + RenderHelperFunctions.CamelCase(p.Name) + "}");
+                }
+
+                urlpath = string.Join("/", nps);
             }
 
             if (string.IsNullOrEmpty(urlpath))
