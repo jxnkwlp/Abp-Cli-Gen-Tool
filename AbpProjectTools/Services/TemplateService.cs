@@ -150,6 +150,11 @@ public static class RenderHelperFunctions
         return source.Humanize(LetterCasing.Title);
     }
 
+    /// <summary>
+    ///  "Pascal case input string is turned into sentence".Dehumanize() => "PascalCaseInputStringIsTurnedIntoSentence"
+    /// </summary>
+    /// <param name="source"></param>
+    /// <returns></returns>
     public static string ToDehumanize(string source)
     {
         if (source == null)
@@ -158,6 +163,11 @@ public static class RenderHelperFunctions
         return source.Dehumanize();
     }
 
+    /// <summary>
+    ///  "some_title for something".Pascalize() => "SomeTitleForSomething"
+    /// </summary>
+    /// <param name="source"></param>
+    /// <returns></returns>
     public static string ToPascalize(string source)
     {
         if (source == null)
@@ -166,11 +176,29 @@ public static class RenderHelperFunctions
         return source.Pascalize();
     }
 
+    /// <summary>
+    ///  "some_title for something".Camelize() => "someTitleForSomething"
+    /// </summary>
+    /// <param name="source"></param>
+    /// <returns></returns>
     public static string ToCamelize(string source)
     {
         if (source == null)
             return source;
 
         return source.Camelize();
+    }
+
+    /// <summary>
+    ///  "SomeText".Kebaberize() => "some-text"
+    /// </summary>
+    /// <param name="source"></param>
+    /// <returns></returns>
+    public static string ToKebaberize(string source)
+    {
+        if (source == null)
+            return source;
+
+        return source.Kebaberize();
     }
 }

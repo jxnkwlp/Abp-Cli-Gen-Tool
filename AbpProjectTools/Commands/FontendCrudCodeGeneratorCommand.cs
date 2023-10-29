@@ -70,7 +70,7 @@ public class FontendCrudCodeGeneratorCommand : CommandBase
                 EditFields = editFields,
                 GenCreateOrUpdate = options.GenCreateOrUpdate,
             });
-            WriteFileContent(Path.Combine(rootPath, "src", ".tmp", "pages", options.Name.ToLowerInvariant()) + ".tsx", crudContent, options.Overwrite);
+            WriteFileContent(Path.Combine(rootPath, "src", ".tmp", "pages", RenderHelperFunctions.ToKebaberize(options.Name) + ".tsx"), crudContent, options.Overwrite);
 
             // locale
             var localeContent = templateService.Render("AntdCrudLocale", new FontendCrudCodeGenerateOptions
@@ -83,7 +83,7 @@ public class FontendCrudCodeGeneratorCommand : CommandBase
                 EditFields = editFields,
                 GenCreateOrUpdate = options.GenCreateOrUpdate,
             });
-            WriteFileContent(Path.Combine(rootPath, "src", ".tmp", "locales", $"pages.{options.Name.ToLowerInvariant()}.ts"), localeContent, options.Overwrite);
+            WriteFileContent(Path.Combine(rootPath, "src", ".tmp", "locales", $"pages.{RenderHelperFunctions.ToCamelize(options.Name)}.ts"), localeContent, options.Overwrite);
 
             Console.WriteLine("🎉 Done. ");
         });
