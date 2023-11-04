@@ -16,13 +16,12 @@ public class FontendCrudCodeGeneratorCommand : CommandBase
         var command = new Command("crud", "Generate crud page code base on swagger json document");
 
         command.AddOption(new Option<string>("--swagger-url", "The swagger api json document url") { IsRequired = true, });
-        command.AddOption(new Option<string>(new[] { "--root", "-o" }, "") { IsRequired = true, });
-        command.AddOption(new Option<string>("--name", "") { IsRequired = true, });
-        command.AddOption(new Option<string>(new string[] { "--default-model", "-dm" }, ""));
-        command.AddOption(new Option<string>(new[] { "--edit-model", "-em" }, ""));
+        command.AddOption(new Option<string>(new[] { "--project-root", "-o" }, "The project root directory path") { IsRequired = true, });
+        command.AddOption(new Option<string>("--name", "The page name") { IsRequired = true, });
+        command.AddOption(new Option<string>(new string[] { "--default-model", "-dm" }, "The page default model name for list"));
+        command.AddOption(new Option<string>(new[] { "--edit-model", "-em" }, "The page edit model name"));
         command.AddOption(new Option<string>("--templates", ""));
-        command.AddOption(new Option<bool>("--overwrite", () => false));
-        command.AddOption(new Option<bool>(new[] { "--gen-create-or-update", "-cu" }, () => true));
+        command.AddOption(new Option<bool>(new[] { "--gen-create-or-update", "-cu" }, () => true, "Can generte create or update content"));
 
 
         var helper = new OpenApiDocumentService();
@@ -38,7 +37,9 @@ public class FontendCrudCodeGeneratorCommand : CommandBase
 
             Console.WriteLine("🎉 Loading successful. ");
 
-            var rootPath = options.Root;
+            Console.WriteLine("👍 The project root path: " + options.ProjectRoot);
+
+            var rootPath = options.ProjectRoot;
 
             string defaultSchameName = options.DefaultModel ?? options.Name;
             string editSchameName = options.EditModel ?? options.Name;
@@ -70,7 +71,7 @@ public class FontendCrudCodeGeneratorCommand : CommandBase
                 EditFields = editFields,
                 GenCreateOrUpdate = options.GenCreateOrUpdate,
             });
-            WriteFileContent(Path.Combine(rootPath, "src", ".tmp", "pages", RenderHelperFunctions.ToKebaberize(options.Name) + ".tsx"), crudContent, options.Overwrite);
+            WriteFileContent(Path.Combine(rootPath, "src", ".tmp", "pages", RenderHelperFunctions.ToKebaberize(options.Name) + ".tsx"), crudContent, true);
 
             // locale
             var localeContent = templateService.Render("AntdCrudLocale", new FontendCrudCodeGenerateOptions
@@ -83,7 +84,7 @@ public class FontendCrudCodeGeneratorCommand : CommandBase
                 EditFields = editFields,
                 GenCreateOrUpdate = options.GenCreateOrUpdate,
             });
-            WriteFileContent(Path.Combine(rootPath, "src", ".tmp", "locales", $"pages.{RenderHelperFunctions.ToCamelize(options.Name)}.ts"), localeContent, options.Overwrite);
+            WriteFileContent(Path.Combine(rootPath, "src", ".tmp", "locales", $"pages.{RenderHelperFunctions.ToCamelize(options.Name)}.ts"), localeContent, true);
 
             Console.WriteLine("🎉 Done. ");
         });
@@ -123,12 +124,11 @@ public class FontendCrudCodeGeneratorCommand : CommandBase
 public class FontendCrudCodeGeneratorCommandOptions
 {
     public string SwaggerUrl { get; set; }
-    public string Root { get; set; }
+    public string ProjectRoot { get; set; }
     public string Templates { get; set; }
     public string Name { get; set; }
     public string DefaultModel { get; set; }
     public string EditModel { get; set; }
-    public bool Overwrite { get; set; }
     public bool GenCreateOrUpdate { get; set; }
 }
 
