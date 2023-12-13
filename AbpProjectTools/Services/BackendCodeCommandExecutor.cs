@@ -120,8 +120,8 @@ public class BackendCodeCommandExecutor
             Console.WriteLine($"🚗 Staring generate domain '{options.Name}' repository code ..");
 
             var domainInfo = typeService.GetDomain(options.Name);
-            var efInfo = typeService.GetEfCore();
-            var mongdbInfo = typeService.GetMongoDB();
+            var efInfo = typeService.GetEfCore(false);
+            var mongdbInfo = typeService.GetMongoDB(false);
 
             if (efInfo == null && mongdbInfo == null)
             {

@@ -156,14 +156,19 @@ public class TypeService : IDisposable
         }
     }
 
-    public DBRepositoryDefinitions GetEfCore()
+    public DBRepositoryDefinitions GetEfCore(bool checkDirectory = true)
     {
         var efProject = FileHelper.GetEntityFrameworkCoreProjectDirectory(_solutionDir);
 
         try
         {
             if (efProject == null)
-                throw new Exception($"The EntityFrameworkCore project not found in folder '{_solutionDir}'");
+            {
+                if (checkDirectory)
+                    throw new Exception($"The EntityFrameworkCore project not found in folder '{_solutionDir}'");
+                else
+                    return null;
+            }
 
             var efDllFile = efProject.EnumerateFiles("bin/**.EntityFrameworkCore.dll", SearchOption.AllDirectories).FirstOrDefault();
 
@@ -197,14 +202,19 @@ public class TypeService : IDisposable
         }
     }
 
-    public DBRepositoryDefinitions GetMongoDB()
+    public DBRepositoryDefinitions GetMongoDB(bool checkDirectory = true)
     {
         var project = FileHelper.GetMongoDBProjectDirectory(_solutionDir);
 
         try
         {
             if (project == null)
-                return null;
+            {
+                if (checkDirectory)
+                    throw new Exception($"The MongoDB project not found in folder '{_solutionDir}'");
+                else
+                    return null;
+            }
 
             var dllFile = project.EnumerateFiles("bin/**.MongoDB.dll", SearchOption.AllDirectories).FirstOrDefault();
 
