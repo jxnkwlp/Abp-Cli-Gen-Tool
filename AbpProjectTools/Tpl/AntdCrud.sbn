@@ -42,6 +42,20 @@ const handle{{name | to_pascalize }}Delete = async (id: string) => {
     return false;
 };
 
+{{~ func output_params_1 (cName, sName, params) ~}}
+                        {{~ for schame in params ~}}
+                        {{~if schame.type == 6 && schame.object_definition ~}}
+                        {{~ output_params_1 cName+"."+schame.name schame.name schame.object_definition.params ~}}
+                        {{~else~}}
+                        {
+                            dataIndex: [{{sName ? "'"+sName+"', ": null}} '{{schame.name}}'],
+                            title: intl.formatMessage({ id: 'page.{{cName | camel_case}}.field.{{schame.name | camel_case}}' }),
+                            search: false
+                        },
+                        {{~end~}}
+                        {{~end~}}
+{{~ end ~}}
+
 const {{name | to_pascalize }}: React.FC = () => {
     const intl = useIntl();
     const access = useAccess();
@@ -63,13 +77,8 @@ const {{name | to_pascalize }}: React.FC = () => {
                 <ProTable<API.{{name | to_pascalize }}>
                     actionRef={tableActionRef}
                     columns={[
-                        {{~ for schame in default_fields ~}}
-                        {
-                            dataIndex: '{{schame.name}}',
-                            title: intl.formatMessage({ id: 'page.{{name | camel_case}}.field.{{schame.name | camel_case}}' }),
-                            search: false
-                        },
-                        {{~end~}}
+                        {{ output_params_1 name null default_fields }}
+                        // action column
                         {
                             title: intl.formatMessage({ id: 'common.dict.table-action' }),
                             valueType: 'option',
@@ -145,7 +154,7 @@ const {{name | to_pascalize }}: React.FC = () => {
                 />
             </Card>
 
-            {{~ if gen_create_or_update ~}} 
+            {{~ if gen_create_or_update ~}}
             {/* '{{name | to_title}}' Create/Update */}
             <ModalForm
                 title={editModalTitle}
@@ -178,7 +187,7 @@ const {{name | to_pascalize }}: React.FC = () => {
                 labelCol={%{{{ span: 6 }}}%}
                 labelWrap
             >
-{{~ func output_params (names, params) ~}}
+{{~ func output_params (cName, sName, params) ~}}
     {{~ for schame in params ~}}
                 {{~if schame.type == 2 ~}}
                 <ProFormDigit
@@ -197,18 +206,18 @@ const {{name | to_pascalize }}: React.FC = () => {
                         { max: {{schame.max_length}} },
                         {{~ end ~}}
                     ]}
-                    name={['{{schame.name}}']}
-                    label={intl.formatMessage({ id: 'page.{{name | camel_case}}.field.{{schame.name | camel_case}}' })}
+                    name={[{{sName ? "'"+sName+"', ": null}} '{{schame.name}}']}
+                    label={intl.formatMessage({ id: 'page.{{cName | camel_case}}.field.{{schame.name | camel_case}}' })}
                 {{~ if schame.type == 1 && schame.max_length == null ~}}
                     fieldProps={%{{{ rows: 2 }}}%}
                 {{~end~}}
                 />
     {{~ if schame.object_definition != null ~}}
-    {{~ output_params names schame.object_definition.params ~}} 
+    {{~ output_params cName+"."+schame.name schame.name schame.object_definition.params ~}}
     {{~end~}}
     {{~ end ~}}
 {{~ end ~}}
-                {{~ output_params name edit_fields~}}
+                {{~ output_params name null edit_fields~}}
             </ModalForm>
             {{~ end ~}}
         </PageContainer>

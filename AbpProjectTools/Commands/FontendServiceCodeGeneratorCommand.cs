@@ -20,6 +20,7 @@ public class FontendServiceCodeGeneratorCommand : CommandBase
         command.AddOption(new Option<string>("--project-name", ""));
         command.AddOption(new Option<bool>("--debug", ""));
         command.AddOption(new Option<string[]>("--tags", ""));
+        command.AddOption(new Option<string[]>("--remove-prefix", ""));
         command.AddOption(new Option<string>("--request-import", ""));
 
 
@@ -38,7 +39,9 @@ public class FontendServiceCodeGeneratorCommand : CommandBase
 
             var outputPath = options.Output;
             if (!string.IsNullOrWhiteSpace(options.ProjectName))
+            {
                 outputPath = Path.Combine(options.Output, options.ProjectName);
+            }
 
             // service
             foreach (var item in apiInfo.Apis.GroupBy(x => x.Tags[0]))
@@ -107,6 +110,7 @@ public class FontendServiceCodeGeneratorCommandOptions
     public string Output { get; set; }
     public string[] IgnoreUrls { get; set; }
     public string[] Tags { get; set; }
+    public string[] RemovePrefix { get; set; }
 
     public bool Debug { get; set; }
 

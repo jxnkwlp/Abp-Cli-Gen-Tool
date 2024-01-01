@@ -37,7 +37,7 @@ public class ApiParamItem : IEquatable<ApiParamItem>
 
     public override string ToString()
     {
-        return $"[{Type.ToString()}] {Name}";
+        return $"[{Type}] {Name}";
     }
 
     public static bool operator ==(ApiParamItem left, ApiParamItem right)
