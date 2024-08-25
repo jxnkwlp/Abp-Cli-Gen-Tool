@@ -21,6 +21,7 @@ public class FontendCrudCodeGeneratorCommand : CommandBase
         command.AddOption(new Option<string>(new string[] { "--default-model", "-dm" }, "The page default model name for list"));
         command.AddOption(new Option<string>(new[] { "--edit-model", "-em" }, "The page edit model name"));
         command.AddOption(new Option<string>("--templates", ""));
+        command.AddOption(new Option<bool>("--yaml", ""));
         command.AddOption(new Option<bool>(new[] { "--gen-create-or-update", "-cu" }, () => true, "Can generte create or update content"));
 
 
@@ -33,7 +34,7 @@ public class FontendCrudCodeGeneratorCommand : CommandBase
             Console.WriteLine("🚗 Staring generate CRUD page code ...");
             Console.WriteLine($"🚗 Loading api document from url '{options.SwaggerUrl}'... ");
 
-            var apiInfo = await helper.LoadAsync(options.SwaggerUrl);
+            var apiInfo = await helper.LoadAsync(options.SwaggerUrl, options.Yaml);
 
             Console.WriteLine("🎉 Loading successful. ");
 
@@ -124,6 +125,7 @@ public class FontendCrudCodeGeneratorCommand : CommandBase
 public class FontendCrudCodeGeneratorCommandOptions
 {
     public string SwaggerUrl { get; set; }
+    public bool Yaml { get; set; }
     public string ProjectRoot { get; set; }
     public string Templates { get; set; }
     public string Name { get; set; }

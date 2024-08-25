@@ -31,6 +31,16 @@ public class {{domain.type_name}}Repository : EfCoreRepository<{{info.type_name}
     // 
     //     return entity ?? throw new EntityNotFoundException(typeof({{domain.type_name}}));
     // }
+    
+
+    // public virtual async Task<bool> IsNameExistsAsync(string name, Guid[] excludeIds = null, CancellationToken cancellationToken = default)
+    // {
+    //     var dbset = await GetDbSetAsync();
+    // 
+    //     return await dbset
+    //         .WhereIf(excludeIds?.Any() == true, x => !excludeIds.Contains(x.Id))
+    //         .AnyAsync(x => x.Name == name, cancellationToken: cancellationToken);
+    // }
 
     public virtual async Task<long> GetCountAsync(string? filter = null, CancellationToken cancellationToken = default)
     {
@@ -65,13 +75,4 @@ public class {{domain.type_name}}Repository : EfCoreRepository<{{info.type_name}
             .PageBy(skipCount, maxResultCount)
             .ToListAsync(cancellationToken);
     }
-
-    // public virtual async Task<bool> IsNameExistsAsync(string name, Guid[] excludeIds = null, CancellationToken cancellationToken = default)
-    // {
-    //     var dbset = await GetDbSetAsync();
-    // 
-    //     return await dbset
-    //         .WhereIf(excludeIds?.Any() == true, x => !excludeIds.Contains(x.Id))
-    //         .AnyAsync(x => x.Name == name, cancellationToken: cancellationToken);
-    // }
 }

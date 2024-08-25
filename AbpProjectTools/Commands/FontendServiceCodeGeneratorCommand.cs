@@ -18,6 +18,7 @@ public class FontendServiceCodeGeneratorCommand : CommandBase
         command.AddOption(new Option<string[]>("--ignore-urls", ""));
         command.AddOption(new Option<string>("--templates", ""));
         command.AddOption(new Option<string>("--project-name", ""));
+        command.AddOption(new Option<bool>("--yaml", ""));
         command.AddOption(new Option<bool>("--debug", ""));
         command.AddOption(new Option<string[]>("--tags", ""));
         command.AddOption(new Option<string[]>("--remove-prefix", ""));
@@ -33,7 +34,7 @@ public class FontendServiceCodeGeneratorCommand : CommandBase
             Console.WriteLine($"🚗 Staring generate typescript services and typing file...");
             Console.WriteLine($"🚗 Loading api document from url '{options.SwaggerUrl}'... ");
 
-            var apiInfo = await helper.LoadAsync(options.SwaggerUrl);
+            var apiInfo = await helper.LoadAsync(options.SwaggerUrl, options.Yaml);
 
             Console.WriteLine($"🎉 Loading successful. ");
 
@@ -105,6 +106,7 @@ public class FontendServiceCodeGeneratorCommand : CommandBase
 public class FontendServiceCodeGeneratorCommandOptions
 {
     public string SwaggerUrl { get; set; }
+    public bool Yaml { get; set; }
     public string Templates { get; set; }
     public string ProjectName { get; set; }
     public string Output { get; set; }

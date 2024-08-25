@@ -35,6 +35,17 @@ public class {{domain.type_name}}Repository : MongoDbRepository<{{info.type_name
     //     return entity ?? throw new EntityNotFoundException(typeof({{domain.type_name}}));
     // }
 
+    
+    // public virtual async Task<bool> IsNameExistsAsync(string name, Guid[] excludeIds = null, CancellationToken cancellationToken = default)
+    // {
+    //     var query = await GetMongoQueryableAsync();
+    // 
+    //     return await query
+    //         .WhereIf(excludeIds?.Any() == true, x => !excludeIds.Contains(x.Id))
+    //         .As<IMongoQueryable<{{domain.type_name}}>>()
+    //         .AnyAsync(x => x.Name == name, cancellationToken: cancellationToken);
+    // }
+
     public virtual async Task<long> GetCountAsync(string? filter = null, CancellationToken cancellationToken = default)
     {
         var query = await GetMongoQueryableAsync();
@@ -71,14 +82,4 @@ public class {{domain.type_name}}Repository : MongoDbRepository<{{info.type_name
             .As<IMongoQueryable<{{domain.type_name}}>>()
             .ToListAsync(cancellationToken);
     }
-
-    // public virtual async Task<bool> IsNameExistsAsync(string name, Guid[] excludeIds = null, CancellationToken cancellationToken = default)
-    // {
-    //     var query = await GetMongoQueryableAsync();
-    // 
-    //     return await query
-    //         .WhereIf(excludeIds?.Any() == true, x => !excludeIds.Contains(x.Id))
-    //         .As<IMongoQueryable<{{domain.type_name}}>>()
-    //         .AnyAsync(x => x.Name == name, cancellationToken: cancellationToken);
-    // }
 }

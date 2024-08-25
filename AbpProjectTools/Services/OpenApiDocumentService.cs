@@ -14,9 +14,18 @@ public class OpenApiDocumentService
 
     public static bool UseFullTypeName { get; set; } = false;
 
-    public async Task<ApiInfoModel> LoadAsync(string url)
+    public async Task<ApiInfoModel> LoadAsync(string url, bool isYaml = false)
     {
-        var document = await OpenApiDocument.FromUrlAsync(url);
+        OpenApiDocument document;
+
+        if (isYaml)
+        {
+            document = await OpenApiYamlDocument.FromUrlAsync(url);
+        }
+        else
+        {
+            document = await OpenApiDocument.FromUrlAsync(url);
+        }
 
         document.GenerateOperationIds();
 
