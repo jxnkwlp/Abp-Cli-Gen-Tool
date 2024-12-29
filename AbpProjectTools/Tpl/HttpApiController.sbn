@@ -12,16 +12,16 @@ using {{item}};
 
 namespace {{app_service.namespace}};
 
-// [Area({{projectName}}RemoteServiceConsts.RemoteServiceName)]
-[RemoteService]
+[Area({{project_name}}RemoteServiceConsts.RemoteServiceName)]
+[RemoteService(Name = {{project_name}}RemoteServiceConsts.RemoteServiceName)]
 [Route("api/{{app_service.name | to_slug_string | to_pluralize }}")]
 public class {{app_service.name}}Controller : {{base_controller}}, I{{app_service.name}}AppService
 {
-    private readonly I{{app_service.name}}AppService _service;
+    protected I{{app_service.name}}AppService Service {get;}
 
     public {{app_service.name}}Controller(I{{app_service.name}}AppService service)
     {
-        _service = service;
+        Service = service;
     }
 
 {{~for item in app_service.methods~}}
@@ -39,7 +39,7 @@ public class {{app_service.name}}Controller : {{base_controller}}, I{{app_servic
     {{-end-}}
     )
     {
-        return _service.{{item.name}}(
+        return Service.{{item.name}}(
             {{-for p in item.params-}}
                 {{p.name}}{{for.last?"":", "}}
             {{-end-}}

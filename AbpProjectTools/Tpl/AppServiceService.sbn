@@ -25,10 +25,10 @@ public class {{domain.type_name}}AppService : CrudAppService<{{domain.type_name}
     }
 {{~end~}}
 {{~if !crud~}}
-    private readonly {{domain.type_name}}Manager _{{domain.type_name| camel_case}}Manager;
+    private readonly I{{domain.type_name}}Manager _{{domain.type_name| camel_case}}Manager;
     private readonly I{{domain.type_name}}Repository _{{domain.type_name| camel_case}}Repository;
 
-    public {{domain.type_name}}AppService({{domain.type_name}}Manager {{domain.type_name| camel_case}}Manager, I{{domain.type_name}}Repository {{domain.type_name| camel_case}}Repository)
+    public {{domain.type_name}}AppService(I{{domain.type_name}}Manager {{domain.type_name| camel_case}}Manager, I{{domain.type_name}}Repository {{domain.type_name| camel_case}}Repository)
     {
         _{{domain.type_name | camel_case}}Manager = {{domain.type_name| camel_case}}Manager;
         _{{domain.type_name | camel_case}}Repository = {{domain.type_name| camel_case}}Repository;

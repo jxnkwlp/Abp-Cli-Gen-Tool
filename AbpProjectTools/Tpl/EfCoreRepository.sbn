@@ -31,7 +31,6 @@ public class {{domain.type_name}}Repository : EfCoreRepository<{{info.type_name}
     // 
     //     return entity ?? throw new EntityNotFoundException(typeof({{domain.type_name}}));
     // }
-    
 
     // public virtual async Task<bool> IsNameExistsAsync(string name, Guid[] excludeIds = null, CancellationToken cancellationToken = default)
     // {

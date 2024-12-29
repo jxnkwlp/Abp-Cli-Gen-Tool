@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Pastel;
+using System;
 using System.CommandLine;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Pastel;
 
 namespace AbpProjectTools.Commands;
 

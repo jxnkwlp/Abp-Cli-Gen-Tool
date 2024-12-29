@@ -8,7 +8,11 @@ using Volo.Abp.Uow;
 
 namespace {{type_namespace}};
 
-public class {{type_name}}Manager : DomainService
+public interface I{{type_name}}Manager : IDomainService
+{
+}
+
+public class {{type_name}}Manager : DomainService, I{{type_name}}Manager
 {
     private readonly I{{type_name}}Repository _{{type_name | camel_case}}Repository;
 

@@ -1,7 +1,7 @@
-﻿using System.CommandLine;
+﻿using AbpProjectTools.Services;
+using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
-using AbpProjectTools.Services;
 
 namespace AbpProjectTools.Commands;
 

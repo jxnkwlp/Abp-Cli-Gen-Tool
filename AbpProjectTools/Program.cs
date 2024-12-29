@@ -1,8 +1,8 @@
-﻿using System;
+﻿using AbpProjectTools.Commands;
+using System;
 using System.CommandLine;
 using System.Text;
 using System.Threading.Tasks;
-using AbpProjectTools.Commands;
 
 namespace AbpProjectTools;
 

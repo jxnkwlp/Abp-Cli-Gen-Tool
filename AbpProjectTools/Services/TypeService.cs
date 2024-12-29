@@ -1,13 +1,13 @@
-﻿using System;
+﻿using ICSharpCode.Decompiler;
+using ICSharpCode.Decompiler.CSharp;
+using ICSharpCode.Decompiler.Metadata;
+using ICSharpCode.Decompiler.TypeSystem;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
-using ICSharpCode.Decompiler;
-using ICSharpCode.Decompiler.CSharp;
-using ICSharpCode.Decompiler.Metadata;
-using ICSharpCode.Decompiler.TypeSystem;
 
 namespace AbpProjectTools.Services;
 
@@ -74,7 +74,9 @@ public class TypeService : IDisposable
             if (domainProject == null)
                 throw new Exception($"The domain project not found in folder '{_solutionDir}'");
 
-            var domainDllFile = domainProject.EnumerateFiles("bin/**.Domain.dll", SearchOption.AllDirectories).FirstOrDefault();
+            var projectName = domainProject.Name;
+
+            var domainDllFile = domainProject.EnumerateFiles($"bin/{projectName}.dll", SearchOption.AllDirectories).FirstOrDefault();
 
             if (domainDllFile == null)
                 throw new Exception("The domain dll not found. Please build project .");
@@ -170,7 +172,9 @@ public class TypeService : IDisposable
                     return null;
             }
 
-            var efDllFile = efProject.EnumerateFiles("bin/**.EntityFrameworkCore.dll", SearchOption.AllDirectories).FirstOrDefault();
+            var projectName = efProject.Name;
+
+            var efDllFile = efProject.EnumerateFiles($"bin/{projectName}.dll", SearchOption.AllDirectories).FirstOrDefault();
 
             if (efDllFile == null)
                 return null;
@@ -216,7 +220,9 @@ public class TypeService : IDisposable
                     return null;
             }
 
-            var dllFile = project.EnumerateFiles("bin/**.MongoDB.dll", SearchOption.AllDirectories).FirstOrDefault();
+            var projectName = project.Name;
+
+            var dllFile = project.EnumerateFiles($"bin/{projectName}.dll", SearchOption.AllDirectories).FirstOrDefault();
 
             if (dllFile == null)
                 return null;
@@ -257,7 +263,9 @@ public class TypeService : IDisposable
             if (appContractProject == null)
                 throw new Exception($"The ApplicationContract project not found in folder '{_solutionDir}'");
 
-            var dllFile = appContractProject.EnumerateFiles("bin/**.Application.Contracts.dll", SearchOption.AllDirectories).FirstOrDefault();
+            var projectName = appContractProject.Name;
+
+            var dllFile = appContractProject.EnumerateFiles($"bin/{projectName}.dll", SearchOption.AllDirectories).FirstOrDefault();
 
             if (dllFile == null)
                 throw new Exception("The application dll not found. Please build project .");
@@ -305,18 +313,17 @@ public class TypeService : IDisposable
                 throw new Exception($"The HttApi project not found in folder '{_solutionDir}'");
 
             var csFile = appContractProject.EnumerateFiles($"I{name}AppService.cs", SearchOption.AllDirectories).FirstOrDefault();
-
-            var dllFile = appContractProject.EnumerateFiles("bin/**.Application.Contracts.dll", SearchOption.AllDirectories).FirstOrDefault();
+            var dllFile = appContractProject.EnumerateFiles($"{appContractProject.Name}.dll", SearchOption.AllDirectories).FirstOrDefault();
 
             if (dllFile == null)
-                throw new Exception("The dll not found. Please build project .");
+                throw new Exception($"The application contract dll '{appContractProject.Name}.dll' not found in {appContractProject}. Please build project .");
 
             var decompiler = GetDecompiler(dllFile.FullName);
 
             var appServiceType = decompiler.TypeSystem.MainModule.TypeDefinitions.FirstOrDefault(x => x.Name.StartsWith($"I{name}AppService"));
 
             if (appServiceType == null)
-                throw new Exception($"The application contracts class 'I{name}AppService' of type '{name}' of  not found.");
+                throw new Exception($"The application contracts class 'I{name}AppService' not found in file '{dllFile}'");
 
             var methodTypes = appServiceType.GetMethods();
             var methods = methodTypes.Where(x => !x.IsStatic && !x.Namespace.StartsWith("System")).Select(x => new TypeMethodInfo
@@ -362,7 +369,9 @@ public class TypeService : IDisposable
             if (project == null)
                 throw new Exception($"The HttApi project not found in folder '{_solutionDir}'");
 
-            var dllFile = project.EnumerateFiles("bin/**.HttpApi.dll", SearchOption.AllDirectories).FirstOrDefault();
+            var projectName = project.Name;
+
+            var dllFile = project.EnumerateFiles($"bin/{projectName}.dll", SearchOption.AllDirectories).FirstOrDefault();
 
             if (dllFile == null)
                 throw new Exception("The HttpApi dll not found. Please build project .");

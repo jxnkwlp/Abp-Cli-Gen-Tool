@@ -45,50 +45,55 @@ public static class FileHelper
     {
         var dir = new DirectoryInfo(root);
 
-        return dir.EnumerateDirectories("*.Domain", SearchOption.AllDirectories).FirstOrDefault();
+        var dirs = dir.EnumerateDirectories("*.Domain", SearchOption.AllDirectories);
+        return dirs.OrderBy(x => x.FullName.Length).FirstOrDefault();
     }
 
     public static DirectoryInfo GetDomainSharedProjectDirectory(string root)
     {
         var dir = new DirectoryInfo(root);
 
-        return dir.EnumerateDirectories("*.Domain.Shared", SearchOption.AllDirectories).FirstOrDefault();
+        var dirs = dir.EnumerateDirectories("*.Domain.Shared", SearchOption.AllDirectories);
+        return dirs.OrderBy(x => x.FullName.Length).FirstOrDefault();
     }
 
     public static DirectoryInfo GetHttpControllerProjectDirectory(string root)
     {
         var dir = new DirectoryInfo(root);
 
-        return dir.EnumerateDirectories("*.HttpApi", SearchOption.AllDirectories).FirstOrDefault();
+        var dirs = dir.EnumerateDirectories("*.HttpApi", SearchOption.AllDirectories);
+        return dirs.OrderBy(x => x.FullName.Length).FirstOrDefault();
     }
 
     public static DirectoryInfo GetApplicationProjectDirectory(string root)
     {
         var dir = new DirectoryInfo(root);
 
-        return dir.EnumerateDirectories("*.Application", SearchOption.AllDirectories).FirstOrDefault();
+        var dirs = dir.EnumerateDirectories("*.Application", SearchOption.AllDirectories);
+        return dirs.OrderBy(x => x.FullName.Length).FirstOrDefault();
     }
 
     public static DirectoryInfo GetApplicationContractProjectDirectory(string root)
     {
         var dir = new DirectoryInfo(root);
 
-        return dir.EnumerateDirectories("*.Application.Contracts", SearchOption.AllDirectories).FirstOrDefault();
+        var dirs = dir.EnumerateDirectories("*.Application.Contracts", SearchOption.AllDirectories);
+        return dirs.OrderBy(x => x.FullName.Length).FirstOrDefault();
     }
 
     public static DirectoryInfo GetEntityFrameworkCoreProjectDirectory(string root)
     {
         var dir = new DirectoryInfo(root);
 
-        return dir.EnumerateDirectories("*.EntityFrameworkCore", SearchOption.AllDirectories).FirstOrDefault();
+        var dirs = dir.EnumerateDirectories("*.EntityFrameworkCore", SearchOption.AllDirectories);
+        return dirs.OrderBy(x => x.FullName.Length).FirstOrDefault();
     }
 
     public static DirectoryInfo GetMongoDBProjectDirectory(string root)
     {
         var dir = new DirectoryInfo(root);
 
-        return dir.EnumerateDirectories("*.MongoDB", SearchOption.AllDirectories).FirstOrDefault();
+        var dirs = dir.EnumerateDirectories("*.MongoDB", SearchOption.AllDirectories);
+        return dirs.OrderBy(x => x.FullName.Length).FirstOrDefault();
     }
-
-
 }
