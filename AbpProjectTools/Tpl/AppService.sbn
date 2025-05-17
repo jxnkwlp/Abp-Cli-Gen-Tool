@@ -1,0 +1,123 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Volo.Abp.Application.Dtos;
+using Volo.Abp.Application.Services;
+using Volo.Abp.Domain.Repositories;
+using Volo.Abp.ObjectExtending;
+
+namespace {{type.namespace}};
+
+/// <summary>
+///  Application service for {{type.name}}
+/// </summary>
+{{~if crud && list_result_type_name~}}
+public class {{type.name}}AppService : CrudAppService<{{type.name}},  {{type.name}}Dto, {{list_result_type_name}}, {{type.key}}, {{list_request_type_name}}, {{create_type_name}}, {{update_type_name}}>, I{{type.name}}AppService
+{{~else if crud~}}
+public class {{type.name}}AppService : CrudAppService<{{type.name}}, {{type.name}}Dto, {{type.key}}, {{list_request_type_name}}, {{create_type_name}}, {{update_type_name}}>, I{{type.name}}AppService
+{{~else~}}
+public class {{type.name}}AppService : {{slu_name}}AppService, I{{type.name}}AppService
+{{~end~}}
+{
+{{~if empty~}}
+    // private readonly I{{type.name}}Manager _{{type.name| camel_case}}Manager;
+    // private readonly I{{type.name}}Repository _{{type.name| camel_case}}Repository;
+
+    // public {{type.name}}AppService(I{{type.name}}Manager {{type.name| camel_case}}Manager, I{{type.name}}Repository {{type.name| camel_case}}Repository)
+    // {
+    //     _{{type.name | camel_case}}Manager = {{type.name| camel_case}}Manager;
+    //     _{{type.name | camel_case}}Repository = {{type.name| camel_case}}Repository;
+    // }
+{{~else if crud~}}
+    private readonly I{{type.name}}Manager _{{type.name| camel_case}}Manager;
+
+    public {{type.name}}AppService(I{{type.name}}Manager {{type.name| camel_case}}Manager, I{{type.name}}Repository {{type.name| camel_case}}Repository): base({{type.name| camel_case}}Repository)
+    {
+        _{{type.name | camel_case}}Manager = {{type.name| camel_case}}Manager;
+    }
+{{~else~}}
+    private readonly I{{type.name}}Manager _{{type.name| camel_case}}Manager;
+    private readonly I{{type.name}}Repository _{{type.name| camel_case}}Repository;
+
+    public {{type.name}}AppService(I{{type.name}}Manager {{type.name| camel_case}}Manager, I{{type.name}}Repository {{type.name| camel_case}}Repository)
+    {
+        _{{type.name | camel_case}}Manager = {{type.name| camel_case}}Manager;
+        _{{type.name | camel_case}}Repository = {{type.name| camel_case}}Repository;
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task<PagedResultDto<{{list_result_type_name}}>> GetListAsync({{list_request_type_name}} input)
+    {
+        var count = await _{{type.name | camel_case}}Repository.GetCountAsync(filter: input.Filter);
+        var list = await _{{type.name | camel_case}}Repository.GetPagedListAsync(input.SkipCount, input.MaxResultCount, filter: input.Filter, sorting: input.Sorting);
+
+        return new PagedResultDto<{{list_result_type_name}}>()
+        {
+            Items = ObjectMapper.Map<List<{{type.name}}>, List<{{list_result_type_name}}>>(list),
+            TotalCount = count,
+        };
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task<{{type.name}}Dto> GetAsync({{type.key}} id)
+    {
+        var entity = await _{{type.name | camel_case}}Repository.GetAsync(id);
+
+        return ObjectMapper.Map<{{type.name}}, {{type.name}}Dto>(entity);
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task<{{type.name}}Dto> CreateAsync({{create_type_name}} input)
+    {
+        // TODO: Review
+        var entity = new {{type.name}}(GuidGenerator.Create())
+        {
+            {{~for item in type.members~}}
+            {{~if item.is_class~}}
+            // {{item.member_name}} = default,
+            {{~else if item.can_set && !item.is_inherit~}}
+            {{item.member_name}} = input.{{item.member_name}},
+            {{~end~}}
+            {{~end~}}
+        };
+
+        {{~if type.is_aggregated_type~}}
+        input.MapExtraPropertiesTo(entity);
+        {{~end~}}
+
+        await _{{type.name | camel_case}}Repository.InsertAsync(entity);
+
+        return ObjectMapper.Map<{{type.name}}, {{type.name}}Dto>(entity);
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task<{{type.name}}Dto> UpdateAsync({{type.key}} id, {{update_type_name}} input)
+    {
+        // TODO: Review
+        var entity = await _{{type.name | camel_case}}Repository.GetAsync(id);
+
+        {{~for item in type.members~}}
+        {{~if item.is_class~}}
+        // entity.{{item.member_name}} = input.{{item.member_name}};
+        {{~else if item.can_set && !item.is_inherit~}}
+        entity.{{item.member_name}} = input.{{item.member_name}};
+        {{~end~}}
+        {{~end~}}
+
+        {{~if type.is_aggregated_type~}}
+        input.MapExtraPropertiesTo(entity);
+        {{~end~}}
+
+        await _{{type.name | camel_case}}Repository.UpdateAsync(entity);
+
+        return ObjectMapper.Map<{{type.name}}, {{type.name}}Dto>(entity);
+    }
+
+    /// <inheritdoc/>
+    public virtual async Task DeleteAsync({{type.key}} id)
+    {
+        await _{{type.name | camel_case}}Repository.DeleteAsync(id);
+    }
+{{~end~}}
+
+}

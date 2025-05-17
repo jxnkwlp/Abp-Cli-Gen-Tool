@@ -8,34 +8,35 @@ using Microsoft.EntityFrameworkCore;
 using Volo.Abp.Domain.Repositories.EntityFrameworkCore;
 using Volo.Abp.Domain.Entities;
 using Volo.Abp.EntityFrameworkCore;
-using {{domain.type_namespace}};
+using {{type.namespace}};
+using {{db_context_type.namespace}};
 
-namespace {{info.type_namespace}}.Repositories;
+namespace {{slu_name}}.EntityFrameworkCore.Repositories;
 
-public class {{domain.type_name}}Repository : EfCoreRepository<{{info.type_name}}, {{domain.type_name}}, {{domain.type_key}}>, I{{domain.type_name}}Repository
+public class {{type.name}}Repository : EfCoreRepository<{{db_context_type.name}}, {{type.name}}, {{type.key}}>, I{{type.name}}Repository
 {
-    public {{domain.type_name}}Repository(IDbContextProvider<{{info.type_name}}> dbContextProvider) : base(dbContextProvider)
+    public {{type.name}}Repository(IDbContextProvider<{{db_context_type.name}}> dbContextProvider) : base(dbContextProvider)
     {
     }
 
-    // public virtual async Task<{{domain.type_name}}> FindByNameAsync(string name, CancellationToken cancellationToken = default)
+    // public virtual async Task<{{type.name}}?> FindByNameAsync(string name, CancellationToken cancellationToken = default)
     // {
     //     var dbset = await GetDbSetAsync();
     //     return await dbset.FirstOrDefaultAsync(x => x.Name == name, cancellationToken: cancellationToken);
     // }
 
-    // public virtual async Task<{{domain.type_name}}> GetByNameAsync(string name, CancellationToken cancellationToken = default)
+    // public virtual async Task<{{type.name}}> GetByNameAsync(string name, CancellationToken cancellationToken = default)
     // {
     //     var dbset = await GetDbSetAsync();
     //     var entity = await dbset.FirstOrDefaultAsync(x => x.Name == name, cancellationToken: cancellationToken);
-    // 
-    //     return entity ?? throw new EntityNotFoundException(typeof({{domain.type_name}}));
+    //
+    //     return entity ?? throw new EntityNotFoundException(typeof({{type.name}}));
     // }
 
     // public virtual async Task<bool> IsNameExistsAsync(string name, Guid[] excludeIds = null, CancellationToken cancellationToken = default)
     // {
     //     var dbset = await GetDbSetAsync();
-    // 
+    //
     //     return await dbset
     //         .WhereIf(excludeIds?.Any() == true, x => !excludeIds.Contains(x.Id))
     //         .AnyAsync(x => x.Name == name, cancellationToken: cancellationToken);
@@ -51,7 +52,7 @@ public class {{domain.type_name}}Repository : EfCoreRepository<{{info.type_name}
             .LongCountAsync(cancellationToken);
     }
 
-    public virtual async Task<List<{{domain.type_name}}>> GetListAsync(string? filter = null, bool includeDetails = false, CancellationToken cancellationToken = default)
+    public virtual async Task<List<{{type.name}}>> GetListAsync(string? filter = null, bool includeDetails = false, CancellationToken cancellationToken = default)
     {
         var dbset = await GetDbSetAsync();
 
@@ -62,7 +63,7 @@ public class {{domain.type_name}}Repository : EfCoreRepository<{{info.type_name}
             .ToListAsync(cancellationToken);
     }
 
-    public virtual async Task<List<{{domain.type_name}}>> GetPagedListAsync(int skipCount, int maxResultCount, string? filter = null, string? sorting = null, bool includeDetails = false, CancellationToken cancellationToken = default)
+    public virtual async Task<List<{{type.name}}>> GetPagedListAsync(int skipCount, int maxResultCount, string? filter = null, string? sorting = null, bool includeDetails = false, CancellationToken cancellationToken = default)
     {
         var dbset = await GetDbSetAsync();
 
@@ -70,7 +71,7 @@ public class {{domain.type_name}}Repository : EfCoreRepository<{{info.type_name}
             // TODO
             //.IncludeIf(includeDetails, TODO )
             //.WhereIf(!string.IsNullOrEmpty(filter), x => x.Name.Contains(filter))
-            .OrderBy(sorting ?? nameof({{domain.type_name}}.CreationTime) + " desc")
+            .OrderBy(sorting ?? nameof({{type.name}}.CreationTime) + " desc")
             .PageBy(skipCount, maxResultCount)
             .ToListAsync(cancellationToken);
     }

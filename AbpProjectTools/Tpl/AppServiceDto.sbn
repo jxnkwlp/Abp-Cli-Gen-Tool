@@ -2,30 +2,27 @@
 using System.Threading.Tasks;
 using Volo.Abp.Application.Dtos;
 using Volo.Abp.Application.Services;
-{{~for item in domain.property_namespaces~}}
-using {{item}};
-{{~end~}}
 
-namespace {{domain.type_namespace}};
+namespace {{type.namespace}};
 
 {{~if is_list_request_type~}}
-public class {{type_name}} : PagedAndSortedResultRequestDto
+public class {{output_name}} : PagedAndSortedResultRequestDto
 {{~else if is_list_result_type~}}
-public class {{type_name}} : ExtensibleEntityDto<{{domain.type_key}}>
-{{~else if is_create_type || is_update_type ~}}
-public class {{type_name}} : ExtensibleEntityDto
+public class {{output_name}} : {{type.is_aggregated_type?"Extensible":""}}{{type.base_abp_type | replace 'AggregateRoot' 'Entity'}}Dto<{{type.key}}>
+{{~else if is_create_or_update_type ~}}
+public class {{output_name}} : {{type.is_aggregated_type?"Extensible":""}}{{type.base_abp_type | replace 'AggregateRoot' 'Entity'}}Dto
 {{~else if is_entity_type~}}
-public class {{type_name}} : ExtensibleAuditedEntityDto<{{domain.type_key}}>
+public class {{output_name}} : {{type.is_aggregated_type?"Extensible":""}}{{type.base_abp_type | replace 'AggregateRoot' 'Entity'}}Dto<{{type.key}}>
 {{~else}}
-public class {{type_name}} : ExtensibleEntityDto
+public class {{output_name}} : {{type.is_aggregated_type?"Extensible":""}}{{type.base_abp_type | replace 'AggregateRoot' 'Entity'}}Dto
 {{~end~}}
 {
     {{~if is_list_request_type~}}
     public virtual string? Filter { get; set; }
     {{~else~}}
-{{~for item in domain.properties~}}
-{{~if !item.is_inherited~}}
-    public virtual {{item.type_code}}{{item.is_nullable?"?":""}} {{item.name}} { get; set; }{{item.is_required ? " = null!;": ""}}
+{{~for item in type.members~}}
+{{~if !item.is_inherit~}}
+    public virtual {{item.type_code}}{{item.is_class?"Dto":""}}{{item.is_nullable?"?":""}} {{item.member_name}} { get; set; }{{!item.is_nullable ? " = default!;": ""}}
 {{~end~}}
 {{~end~}}
     {{~end~}}

@@ -1,4 +1,5 @@
-﻿using ICSharpCode.Decompiler;
+﻿using AbpProjectTools.Models;
+using ICSharpCode.Decompiler;
 using ICSharpCode.Decompiler.CSharp;
 using ICSharpCode.Decompiler.Metadata;
 using ICSharpCode.Decompiler.TypeSystem;
@@ -6,27 +7,19 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection.Metadata;
-using System.Reflection.PortableExecutable;
+using System.Text;
 
 namespace AbpProjectTools.Services;
 
 public class TypeService : IDisposable
 {
-    private readonly string _solutionDir;
-    private readonly DirectoryInfo _hostProjectDirectory = null;
+    private static readonly Dictionary<string, ClassTypeInfoModel> _cache = new Dictionary<string, ClassTypeInfoModel>();
 
-    public TypeService(string solutionDir)
+    private readonly DirectoryInfo _sluDirectory = null;
+
+    public TypeService(string sluDirectory)
     {
-        _solutionDir = solutionDir;
-        _hostProjectDirectory = FileHelper.GetHostProjectDirectory(_solutionDir);
-    }
-
-    public string GetSlutionName()
-    {
-        var file = Directory.GetFiles(_solutionDir, "*.sln", SearchOption.TopDirectoryOnly).FirstOrDefault();
-
-        return Path.GetFileNameWithoutExtension(file);
+        _sluDirectory = new DirectoryInfo(sluDirectory);
     }
 
     private CSharpDecompiler GetDecompiler(string fileName)
@@ -39,21 +32,18 @@ public class TypeService : IDisposable
             resolver.AddSearchDirectory(item);
         }
 
-        if (_hostProjectDirectory != null)
+        if (_sluDirectory.Exists)
         {
-            var webBinDir = _hostProjectDirectory.GetDirectories("Debug", SearchOption.AllDirectories).FirstOrDefault();
+            var allBinDirs = _sluDirectory.EnumerateDirectories("Debug", SearchOption.AllDirectories);
 
-            if (webBinDir?.Exists == true)
+            foreach (var item in allBinDirs)
             {
-                if (webBinDir.EnumerateDirectories().Any())
-                    webBinDir = webBinDir.EnumerateDirectories().FirstOrDefault();
-
-                resolver.AddSearchDirectory(webBinDir.FullName);
+                resolver.AddSearchDirectory(item.FullName);
             }
         }
 
         // add nuget cache 
-        var nugetCache = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), @".nuget\packages");
+        var nugetCache = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".nuget", "packages");
 
         resolver.AddSearchDirectory(nugetCache);
 
@@ -64,392 +54,300 @@ public class TypeService : IDisposable
         return decompiler;
     }
 
-    public EntityDefinitions GetDomain(string name, bool includeDomainProperties = false)
+    public ClassTypeInfoModel GetDomainInfo(string dllFile, string typeName)
     {
-        var domainProject = FileHelper.GetDomainProjectDirectory(_solutionDir);
-        var domainSharedProject = FileHelper.GetDomainSharedProjectDirectory(_solutionDir);
+        if (_cache.ContainsKey(typeName))
+            return _cache[typeName];
 
-        try
-        {
-            if (domainProject == null)
-                throw new Exception($"The domain project not found in folder '{_solutionDir}'");
-
-            var projectName = domainProject.Name;
-
-            var domainDllFile = domainProject.EnumerateFiles($"bin/{projectName}.dll", SearchOption.AllDirectories).FirstOrDefault();
-
-            if (domainDllFile == null)
-                throw new Exception("The domain dll not found. Please build project .");
-
-            var decompiler = GetDecompiler(domainDllFile.FullName);
-
-            string assemblyName = decompiler.TypeSystem.MainModule.AssemblyName;
-            string rootNamespace = decompiler.TypeSystem.MainModule.RootNamespace.Name;
-
-            var domainTypeDefinitions = decompiler.TypeSystem.MainModule.TypeDefinitions;
-
-            var typeDefinitions = domainTypeDefinitions.Where(x => x.Name == name || x.FullName == name);
-
-            if (typeDefinitions.Any() == false)
-                throw new Exception($"The type '{name}' not found.");
-
-            if (typeDefinitions.Count() > 1)
-                throw new Exception($"The type name '{name}' find more then one. please use full type name.");
-
-            var findType = typeDefinitions.First();
-
-            string key = string.Empty;
-
-            foreach (var item in findType.DirectBaseTypes)
-            {
-                if (item.TypeArguments.Count > 0)
-                {
-                    key = item.TypeArguments[0].Name;
-                    break;
-                }
-            }
-
-            var typeProperties = new List<TypeMemberInfo>();
-            var typeNamespaces = new List<string>();
-
-            if (includeDomainProperties)
-            {
-                var publicPrpoperties = findType.GetProperties(x => x.Accessibility == Accessibility.Public, GetMemberOptions.None);
-
-                foreach (var property in publicPrpoperties)
-                {
-                    if (property.ReturnType.Namespace != findType.Namespace && !typeNamespaces.Contains(property.ReturnType.Namespace) && property.ReturnType.Namespace != "System")
-                    {
-                        typeNamespaces.Add(property.ReturnType.Namespace);
-                    }
-
-                    var memberInfo = GetTypeMemberInfo(findType, property, domainTypeDefinitions);
-                    typeProperties.Add(memberInfo);
-                }
-            }
-
-            var hasConstructorWithId = findType.GetConstructors(x => x.Parameters.Count == 1 && x.Parameters[0].Type.Name == key).Any();
-
-            // source file
-            var csFile = domainProject.EnumerateFiles($"{findType.Name}.cs", SearchOption.AllDirectories).FirstOrDefault();
-
-            if (!csFile.Exists)
-            {
-                throw new Exception($"The source file '{findType.Name}.cs' not found.");
-            }
-
-            return new EntityDefinitions
-            {
-                TypeKey = key,
-                TypeName = findType.Name,
-                TypeFullName = findType.FullName,
-                TypeNamespace = findType.Namespace,
-                FileDirectory = csFile.DirectoryName,
-                FileFullName = csFile.FullName,
-                FileProjectPath = csFile.DirectoryName == domainProject.FullName ? "" : csFile.DirectoryName.Substring(domainProject.FullName.Length + 1),
-                Properties = typeProperties,
-                ConstructorWithId = hasConstructorWithId,
-                PropertyNamespaces = typeNamespaces,
-            };
-        }
-        catch (Exception)
-        {
-            throw;
-        }
+        var result = GetTypeInfo(dllFile, typeName);
+        _cache[typeName] = result;
+        return result;
     }
 
-    public DBRepositoryDefinitions GetEfCore(bool checkDirectory = true)
+    public ClassTypeInfoModel GetRepoDbContext(string dllFile)
     {
-        var efProject = FileHelper.GetEntityFrameworkCoreProjectDirectory(_solutionDir);
+        var decompiler = GetDecompiler(dllFile);
 
-        try
-        {
-            if (efProject == null)
+        string assemblyName = decompiler.TypeSystem.MainModule.AssemblyName;
+        var allTypeDefinitions = decompiler.TypeSystem.MainModule.TypeDefinitions;
+
+        var findDbContext = allTypeDefinitions.FirstOrDefault(x => x.GetAllBaseTypeDefinitions().Any(e => e.Name == "IIdentityDbContext" || e.Name == "IAbpMongoDbContext") && x.Kind == TypeKind.Interface);
+        if (findDbContext != null)
+            return new ClassTypeInfoModel
             {
-                if (checkDirectory)
-                    throw new Exception($"The EntityFrameworkCore project not found in folder '{_solutionDir}'");
-                else
-                    return null;
-            }
-
-            var projectName = efProject.Name;
-
-            var efDllFile = efProject.EnumerateFiles($"bin/{projectName}.dll", SearchOption.AllDirectories).FirstOrDefault();
-
-            if (efDllFile == null)
-                return null;
-
-            var csFile = efProject.EnumerateFiles("*DbContext.cs", SearchOption.AllDirectories).FirstOrDefault();
-
-            var decompiler = GetDecompiler(efDllFile.FullName);
-
-            var types = decompiler.TypeSystem.GetAllTypeDefinitions();
-
-            var findTypes = decompiler.TypeSystem.MainModule.TypeDefinitions.Where(x => x.FullName.EndsWith("DbContext"));
-
-            if (findTypes.Any() == false)
-                throw new Exception($"No dbcontext found.");
-
-            var findType = findTypes.First();
-
-            return new DBRepositoryDefinitions
-            {
-                TypeName = findType.Name,
-                TypeNamespace = findType.Namespace,
-                TypeFullName = findType.FullName,
-                FileDirectoryName = csFile.DirectoryName,
+                Name = findDbContext.Name,
+                FullName = findDbContext.FullName,
+                Namespace = findDbContext.Namespace,
             };
-        }
-        catch (Exception)
-        {
-            throw;
-        }
+
+        findDbContext = allTypeDefinitions.FirstOrDefault(x => x.GetAllBaseTypeDefinitions().Any(e => e.Name == "IIdentityDbContext" || e.Name == "IAbpMongoDbContext") && x.Kind == TypeKind.Class);
+        if (findDbContext != null)
+            return new ClassTypeInfoModel
+            {
+                Name = findDbContext.Name,
+                FullName = findDbContext.FullName,
+                Namespace = findDbContext.Namespace,
+            };
+
+        throw new Exception("The DbContext not found.");
     }
 
-    public DBRepositoryDefinitions GetMongoDB(bool checkDirectory = true)
+    public ClassTypeInfoModel GetAppContract(string dllFile, string name)
     {
-        var project = FileHelper.GetMongoDBProjectDirectory(_solutionDir);
+        var decompiler = GetDecompiler(dllFile);
 
-        try
+        string assemblyName = decompiler.TypeSystem.MainModule.AssemblyName;
+        var allTypeDefinitions = decompiler.TypeSystem.MainModule.TypeDefinitions;
+
+        var find = allTypeDefinitions.FirstOrDefault(x => x.Name.Equals($"I{name}AppService", StringComparison.InvariantCultureIgnoreCase));
+
+        if (find == null)
         {
-            if (project == null)
-            {
-                if (checkDirectory)
-                    throw new Exception($"The MongoDB project not found in folder '{_solutionDir}'");
-                else
-                    return null;
-            }
-
-            var projectName = project.Name;
-
-            var dllFile = project.EnumerateFiles($"bin/{projectName}.dll", SearchOption.AllDirectories).FirstOrDefault();
-
-            if (dllFile == null)
-                return null;
-
-            var csFile = project.EnumerateFiles("*DbContext.cs", SearchOption.AllDirectories).FirstOrDefault();
-
-            var decompiler = GetDecompiler(dllFile.FullName);
-
-            var types = decompiler.TypeSystem.GetAllTypeDefinitions();
-
-            var findTypes = decompiler.TypeSystem.MainModule.TypeDefinitions.Where(x => x.FullName.EndsWith("DbContext"));
-
-            if (findTypes.Any() == false)
-                throw new Exception($"No dbcontext found.");
-
-            var findType = findTypes.First();
-
-            return new DBRepositoryDefinitions
-            {
-                TypeName = findType.Name,
-                TypeNamespace = findType.Namespace,
-                TypeFullName = findType.FullName,
-                FileDirectoryName = csFile.DirectoryName,
-            };
-        }
-        catch (Exception)
-        {
-            throw;
-        }
-    }
-
-    public AppServiceContractTypeDefinitions GetAppContractTypeDefinitions()
-    {
-        var appContractProject = FileHelper.GetApplicationContractProjectDirectory(_solutionDir);
-
-        try
-        {
-            if (appContractProject == null)
-                throw new Exception($"The ApplicationContract project not found in folder '{_solutionDir}'");
-
-            var projectName = appContractProject.Name;
-
-            var dllFile = appContractProject.EnumerateFiles($"bin/{projectName}.dll", SearchOption.AllDirectories).FirstOrDefault();
-
-            if (dllFile == null)
-                throw new Exception("The application dll not found. Please build project .");
-
-            var decompiler = GetDecompiler(dllFile.FullName);
-
-            string assemblyName = decompiler.TypeSystem.MainModule.AssemblyName;
-            string rootNamespace = decompiler.TypeSystem.MainModule.RootNamespace.Name;
-
-            var typeDefinitions = decompiler.TypeSystem.MainModule.TypeDefinitions;
-
-            var types = typeDefinitions.Where(x => x.Name.EndsWith("AppService") || x.Name.EndsWith("Dto"));
-
-            var resultTypes = types.Select(x => new TypeInfo()
-            {
-                Name = x.Name,
-                FullName = x.FullName,
-                Namespace = x.Namespace,
-            });
-
-            return new AppServiceContractTypeDefinitions
-            {
-                AllTypes = resultTypes.ToArray(),
-                ContractTypes = resultTypes.Where(x => x.Name.EndsWith("AppService")).ToArray(),
-                DtoTypes = resultTypes.Where(x => x.Name.EndsWith("Dto")).ToArray(),
-            };
-        }
-        catch (Exception)
-        {
-            throw;
-        }
-    }
-
-    public AppServiceContractDefinition GetAppContractService(string name)
-    {
-        var appContractProject = FileHelper.GetApplicationContractProjectDirectory(_solutionDir);
-        var apiProject = FileHelper.GetHttpControllerProjectDirectory(_solutionDir);
-
-        try
-        {
-            if (appContractProject == null)
-                throw new Exception($"The ApplicationContract project not found in folder '{_solutionDir}'");
-
-            if (apiProject == null)
-                throw new Exception($"The HttApi project not found in folder '{_solutionDir}'");
-
-            var csFile = appContractProject.EnumerateFiles($"I{name}AppService.cs", SearchOption.AllDirectories).FirstOrDefault();
-            var dllFile = appContractProject.EnumerateFiles($"{appContractProject.Name}.dll", SearchOption.AllDirectories).FirstOrDefault();
-
-            if (dllFile == null)
-                throw new Exception($"The application contract dll '{appContractProject.Name}.dll' not found in {appContractProject}. Please build project .");
-
-            var decompiler = GetDecompiler(dllFile.FullName);
-
-            var appServiceType = decompiler.TypeSystem.MainModule.TypeDefinitions.FirstOrDefault(x => x.Name.StartsWith($"I{name}AppService"));
-
-            if (appServiceType == null)
-                throw new Exception($"The application contracts class 'I{name}AppService' not found in file '{dllFile}'");
-
-            var methodTypes = appServiceType.GetMethods();
-            var methods = methodTypes.Where(x => !x.IsStatic && !x.Namespace.StartsWith("System")).Select(x => new TypeMethodInfo
-            {
-                Name = x.Name,
-                Type = x.ReturnType.Name,
-                TypeArguments = x.ReturnType?.TypeArguments?.Select(p => new TypeMemberInfo
-                {
-                    Name = GetTypeSimpleString(p),
-                }).ToList(),
-                IsInherited = x.DeclaringType.FullName.StartsWith("System."),
-                Params = x.Parameters?.Select(p => new TypeMemberInfo
-                {
-                    Name = p.Name,
-                    Type = p.Type.Name,
-                    TypeCode = GetTypeCodeString(p.Type),
-                    IsNullable = p.Type.Nullability == Nullability.Nullable,
-                    IsClass = !p.Type.FullName.StartsWith("System.")
-                }).ToList(),
-            });
-
-            return new AppServiceContractDefinition
-            {
-                ServiceName = appServiceType.Name[1..],
-                Name = appServiceType.Name[1..].Replace("AppService", null),
-                Namespace = appServiceType.Namespace,
-                FileProjectPath = csFile.DirectoryName == appContractProject.FullName ? "" : csFile.DirectoryName.Substring(appContractProject.FullName.Length + 1),
-                Methods = methods.ToList(),
-            };
-        }
-        catch (Exception)
-        {
-            throw;
-        }
-    }
-
-    public HttpControllerTypeDefinitions GetHttpControllerTypeDefinitions()
-    {
-        var project = FileHelper.GetHttpControllerProjectDirectory(_solutionDir);
-
-        try
-        {
-            if (project == null)
-                throw new Exception($"The HttApi project not found in folder '{_solutionDir}'");
-
-            var projectName = project.Name;
-
-            var dllFile = project.EnumerateFiles($"bin/{projectName}.dll", SearchOption.AllDirectories).FirstOrDefault();
-
-            if (dllFile == null)
-                throw new Exception("The HttpApi dll not found. Please build project .");
-
-            var decompiler = GetDecompiler(dllFile.FullName);
-
-            string assemblyName = decompiler.TypeSystem.MainModule.AssemblyName;
-            string rootNamespace = decompiler.TypeSystem.MainModule.RootNamespace.Name;
-
-            var typeDefinitions = decompiler.TypeSystem.MainModule.TypeDefinitions;
-
-            var baseControllerType = typeDefinitions.FirstOrDefault(x => x.DirectBaseTypes.Any(b => b.Name == "AbpControllerBase"));
-
-            var importNamespace = new List<string>();
-
-            if (baseControllerType.Namespace != rootNamespace)
-                importNamespace.Add(baseControllerType.Namespace);
-
-            return new HttpControllerTypeDefinitions
-            {
-                BaseNamespace = rootNamespace,
-                BaseControllerType = baseControllerType.Name,
-                ImportNamespaces = importNamespace,
-            };
-        }
-        catch (Exception)
-        {
-            throw;
-        }
-    }
-
-    private static TypeMemberInfo GetTypeMemberInfo(ITypeDefinition typeDefinition, IProperty property, IEnumerable<ITypeDefinition> allTypeDefinitions)
-    {
-        var typeFullName = property.ReturnType.FullName;
-        var innerType = property.ReturnType;
-        // 
-        if (property.ReturnType.FullName != "System.Nullable" && property.ReturnType.TypeArguments.Count > 0 && property.ReturnType.FullName != property.ReturnType.TypeArguments[0].FullName)
-        {
-            innerType = property.ReturnType.TypeArguments[0];
+            find = allTypeDefinitions.FirstOrDefault(x => x.Kind == TypeKind.Interface && x.GetAllBaseTypeDefinitions().Any(e => e.FullName == "Volo.Abp.Application.Services.IApplicationService") && x.Name.Contains(name));
         }
 
-        var isClass = allTypeDefinitions.Any(x => x.FullName == innerType.FullName || x.FullName == typeFullName);
-        // var isThirdPartyClass = !isClass && !domainTypeDefinitions.Any(x => x.Name == item.ReturnType.Name);
-
-        return new TypeMemberInfo
+        if (find == null)
         {
-            Name = property.Name,
-            TypeCode = GetTypeCodeString(property.ReturnType),
-            Type = typeFullName,
-            InnerType = innerType.Name,
-            InnerTypeFullName = innerType.FullName,
-            IsNullable = property.ReturnType.FullName == "System.Nullable",
-            IsRequired = property.ReturnType.Nullability == Nullability.NotNullable,
-            IsInherited = property.DeclaringTypeDefinition != typeDefinition,
-            IsWrite = property.CanSet,
-            IsClass = isClass,
+            throw new Exception($"The name of '{name}' app service contract not found.");
+        }
+
+        var methods = GetMethods(find);
+
+        return new ClassTypeInfoModel
+        {
+            Name = find.Name,
+            FullName = find.FullName,
+            Namespace = find.Namespace,
+            Methods = methods,
         };
     }
 
-    private static string GetTypeSimpleString(IType sourceType)
+    public ClassTypeInfoModel GetHttpControllerBaseType(string dllFile)
     {
-        string LoopTypeArguments(string parentTypeName, IType type2)
-        {
-            if (type2.TypeArguments.Count > 0)
-            {
-                parentTypeName += "<";
-                foreach (var item in type2.TypeArguments)
-                {
-                    parentTypeName += item.Name;
-                    parentTypeName = LoopTypeArguments(parentTypeName, item);
-                }
-                parentTypeName += ">";
-            }
+        var decompiler = GetDecompiler(dllFile);
 
-            return parentTypeName;
+        string assemblyName = decompiler.TypeSystem.MainModule.AssemblyName;
+        var allTypeDefinitions = decompiler.TypeSystem.MainModule.TypeDefinitions;
+
+        var find = allTypeDefinitions.FirstOrDefault(x => x.IsAbstract && x.DirectBaseTypes.Any(e => e.FullName == "Volo.Abp.AspNetCore.Mvc.AbpControllerBase"));
+
+        if (find == null)
+            return null;
+
+        return new ClassTypeInfoModel
+        {
+            Name = find.Name,
+            FullName = find.FullName,
+            Namespace = find.Namespace,
+        };
+    }
+
+    private ClassTypeInfoModel GetTypeInfo(string dllFile, string typeName)
+    {
+        var decompiler = GetDecompiler(dllFile);
+
+        //string assemblyName = decompiler.TypeSystem.MainModule.AssemblyName;
+        //var allTypeDefinitions = decompiler.TypeSystem.MainModule;
+
+        return GetTypeInfo(decompiler.TypeSystem.MainModule, typeName);
+    }
+
+    private ClassTypeInfoModel GetTypeInfo(IModule module, string typeName)
+    {
+        var result = module.TypeDefinitions.Where(x => x.Name == typeName || x.FullName == typeName);
+
+        if (!result.Any())
+            throw new Exception($"The type '{typeName}' not found.");
+
+        if (result.Count() > 1)
+            throw new Exception($"The type name '{typeName}' more then one. please use the full type name.");
+
+        var findType = result.First();
+
+        var baseTypes = GetBaseTypes(findType);
+        var domainKeyType = FindDomainKey(findType);
+
+        var members = GetMembers(findType, result);
+
+        var references = new List<ClassTypeInfoModel>();
+
+        foreach (var item in members.Where(x => x.IsClass && !x.IsInherit))
+        {
+            references.Add(GetTypeInfo(item.TypeModule, item.TypeFullName));
         }
 
-        return LoopTypeArguments(sourceType.Name, sourceType);
+        return new ClassTypeInfoModel
+        {
+            Key = domainKeyType,
+            Name = findType.Name,
+            FullName = findType.FullName,
+            Namespace = findType.Namespace,
+            BaseType = baseTypes.BaseType,
+            BaseAbpType = baseTypes.BaseAbpType,
+            IsAggregatedType = baseTypes.IsAbpAggregateRoot,
+            IsAbpType = baseTypes.IsAbpDomainType,
+            Members = members,
+            References = references,
+        };
+    }
+
+
+    private ClassBaseTypeInfo GetBaseTypes(ITypeDefinition typeDefinition)
+    {
+        var allbaseTypes = typeDefinition.GetAllBaseTypeDefinitions().Where(x => x.FullName != typeDefinition.FullName).Reverse().ToArray();
+
+        return new ClassBaseTypeInfo
+        {
+            IsAbpAggregateRoot = allbaseTypes.Any(x => x.Name == "IAggregateRoot"),
+            IsAbpDomainType = allbaseTypes.Any(x => x.Name == "IEntity"),
+            BaseAbpType = allbaseTypes.FirstOrDefault(x => x.FullName.StartsWith("Volo.Abp."))?.Name,
+            BaseType = allbaseTypes.FirstOrDefault().Name,
+        };
+    }
+
+    //private string FindBaseDomainType(ITypeDefinition typeDefinition)
+    //{
+    //    foreach (var item in typeDefinition.DirectBaseTypes.Where(x => !x.FullName.StartsWith("System.")))
+    //    {
+    //        if (item.FullName.StartsWith("Volo.Abp."))
+    //        {
+    //            return item.Name;
+    //        }
+    //        else
+    //        {
+    //            return FindBaseDomainType(item.GetDefinition());
+    //        }
+    //    }
+
+    //    return null;
+    //}
+
+    private string FindDomainKey(ITypeDefinition typeDefinition)
+    {
+        foreach (var item in typeDefinition.DirectBaseTypes.Where(x => !x.FullName.StartsWith("System.")))
+        {
+            if (item.FullName.StartsWith("Volo.Abp.") && item.TypeParameterCount > 0)
+            {
+                return item.TypeArguments[0].Name;
+            }
+            else
+            {
+                return FindDomainKey(item.GetDefinition());
+            }
+        }
+
+        return null;
+    }
+
+    public List<MethodTypeInfoModel> GetMethods(ITypeDefinition currentType)
+    {
+        var list = new List<MethodTypeInfoModel>();
+
+        foreach (var item in currentType.Methods.Where(x => x.Accessibility == Accessibility.Public))
+        {
+            var members = item.Parameters.Select(x => new MethodMemberTypeInfoModel
+            {
+                IsClass = !x.Type.FullName.StartsWith("System."),
+                Name = x.Name,
+                TypeCode = GetTypeCodeString(x.Type),
+                TypeName = x.Type.Name,
+            }).ToList();
+
+            bool isAsync = item.ReturnType.FullName == "System.Threading.Tasks.Task";
+
+            var m = new MethodTypeInfoModel
+            {
+                Name = item.Name,
+                IsAsync = isAsync,
+                ReturnTypeName = item.ReturnType.FullName,
+                ReturnTypeCode = GetTypeCodeString(item.ReturnType),
+                Members = members
+            };
+
+            list.Add(m);
+        }
+
+        return list;
+    }
+
+    //private MethodReturnTypeInfo GetReturnType(IType type)
+    //{
+    //    string GetTypeArgumentName(IType currentType)
+    //    {
+    //        if (currentType.TypeArguments.Any())
+    //            return GetTypeArgumentName(currentType.TypeArguments[0]);
+    //        else
+    //            return currentType.Name;
+    //    }
+
+    //    var isAsync = type.FullName == "System.Threading.Tasks.Task";
+    //    // TypeArguments = {ICSharpCode.Decompiler.TypeSystem.IType[1]}
+    //    if (isAsync)
+    //    {
+    //        var code = GetTypeArgumentName(type.TypeArguments[0]);
+    //    }
+
+    //    return new MethodReturnTypeInfo()
+    //    {
+    //        FullTypeName = type.FullName,
+    //        IsAsync = type.FullName == "System.Threading.Tasks.Task",
+    //        TypeCode = isAsync ? GetTypeArgumentName(type.TypeArguments[0]) : type.Name,
+    //    };
+    //}
+
+    public List<MemberTypeInfoModel> GetMembers(ITypeDefinition currentType, IEnumerable<ITypeDefinition> allTypeDefinitions)
+    {
+        var typeNamespaces = new List<string>();
+        var members = new List<MemberTypeInfoModel>();
+        var list = currentType.GetProperties(x => x.Accessibility == Accessibility.Public, GetMemberOptions.None);
+
+        foreach (var property in list)
+        {
+            if (property.ReturnType.Namespace != currentType.Namespace && !typeNamespaces.Contains(property.ReturnType.Namespace) && property.ReturnType.Namespace.StartsWith("System."))
+            {
+                typeNamespaces.Add(property.ReturnType.Namespace);
+            }
+
+            var memberInfo = GetTypeMemberInfo(currentType, property, allTypeDefinitions);
+            members.Add(memberInfo);
+        }
+
+        return members;
+    }
+
+    private static MemberTypeInfoModel GetTypeMemberInfo(ITypeDefinition typeDefinition, IProperty property, IEnumerable<ITypeDefinition> allTypeDefinitions)
+    {
+        var returnType = property.ReturnType;
+
+        // 
+        if (property.ReturnType.FullName != "System.Nullable" && property.ReturnType.TypeArguments.Count > 0 && property.ReturnType.FullName != property.ReturnType.TypeArguments[0].FullName)
+        {
+            returnType = property.ReturnType.TypeArguments[0];
+        }
+
+        var isInherit = property.Namespace != typeDefinition.Namespace;
+        var returnTypeFullName = property.ReturnType.FullName;
+        var isClass = !property.ReturnType.FullName.StartsWith("System.");
+        var isNullable = property.ReturnType.FullName == "System.Nullable";
+
+        return new MemberTypeInfoModel
+        {
+            MemberName = property.Name,
+
+            TypeCode = GetTypeCodeString(property.ReturnType),
+            TypeName = returnType.Name,
+            TypeFullName = returnTypeFullName,
+            TypeNamespace = returnType.Namespace,
+
+            TypeModule = property.ReturnType.GetDefinition().ParentModule,
+
+            CanSet = property.Setter?.Accessibility == Accessibility.Public,
+            CanGet = property.CanGet,
+
+            IsNullable = isNullable,
+            IsClass = isClass,
+            IsInherit = isInherit,
+        };
     }
 
     private static string GetTypeCodeString(IType type)
@@ -461,11 +359,18 @@ public class TypeService : IDisposable
             if (type.TypeArguments.Count > 0)
             {
                 if (type.FullName == "System.Nullable")
-                    return type.TypeArguments[0].Name;
+                    return GetTypeCodeString(type.TypeArguments[0]);
                 else
                 {
-                    var innerTypes = string.Join(", ", type.TypeArguments.Select(x => $"{x.Name}"));
-                    return $"{type.Name}<{innerTypes}>";
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append(type.Name + "<");
+                    foreach (var item in type.TypeArguments)
+                    {
+                        sb.Append(GetTypeCodeString(item));
+                    }
+                    return sb.Append(">").ToString();
+                    //var innerTypes = string.Join(", ", type.TypeArguments.Select(x => $"{x.Name}"));
+                    //return $"{type.Name}<{innerTypes}>";
                 }
             }
 
@@ -502,72 +407,23 @@ public class TypeService : IDisposable
         }
     }
 
+    private class ClassBaseTypeInfo
+    {
+        public bool IsAbpDomainType { get; set; }
+        public bool IsAbpAggregateRoot { get; set; }
+        public string BaseType { get; set; }
+        public string BaseAbpType { get; set; }
+    }
+
+    private class MethodReturnTypeInfo
+    {
+        public bool IsAsync { get; set; }
+        public string FullTypeName { get; set; }
+        public string TypeCode { get; set; }
+    }
+
     public void Dispose()
     {
 
     }
-}
-
-internal class FileResolver : UniversalAssemblyResolver
-{
-    public FileResolver(string mainAssemblyFileName, bool throwOnError, string targetFramework, string runtimePack = null, PEStreamOptions streamOptions = PEStreamOptions.Default, MetadataReaderOptions metadataOptions = MetadataReaderOptions.ApplyWindowsRuntimeProjections) : base(mainAssemblyFileName, throwOnError, targetFramework, runtimePack, streamOptions, metadataOptions)
-    {
-    }
-
-}
-
-/// <summary>
-///  The type information of class
-/// </summary>
-public class TypeInfo
-{
-    public string Name { get; set; }
-    public string FullName { get; set; }
-    public string Namespace { get; set; }
-
-    public override string ToString()
-    {
-        return FullName;
-    }
-}
-
-public class TypeMemberInfo
-{
-    /// <summary>
-    ///  The member name
-    /// </summary>
-    public string Name { get; set; }
-    /// <summary>
-    ///  The member type
-    /// </summary>
-    public string Type { get; set; }
-    public string TypeCode { get; set; }
-    /// <summary>
-    ///  the member inner type from type if exists.
-    /// </summary>
-    public string InnerTypeFullName { get; set; }
-    public string InnerType { get; set; }
-    public bool IsInherited { get; set; }
-    public bool IsNullable { get; set; }
-    public bool IsWrite { get; set; }
-    public bool IsRequired { get; set; }
-    public bool IsClass { get; set; }
-
-    public override string ToString()
-    {
-        return $"{Type} {Name}";
-    }
-}
-
-public class TypeMethodInfo
-{
-    public string Name { get; set; }
-
-    public string Type { get; set; }
-
-    public bool IsInherited { get; set; }
-
-    public IList<TypeMemberInfo> TypeArguments { get; set; }
-
-    public IList<TypeMemberInfo> Params { get; set; }
 }

@@ -9,40 +9,41 @@ using MongoDB.Driver.Linq;
 using Volo.Abp.Domain.Repositories.MongoDB;
 using Volo.Abp.Domain.Entities;
 using Volo.Abp.MongoDB;
-using {{domain.type_namespace}};
+using {{type.namespace}};
+using {{db_context_type.namespace}};
 
-namespace {{info.type_namespace}}.Repositories;
+namespace {{slu_name}}.MongoDB.Repositories;
 
-public class {{domain.type_name}}Repository : MongoDbRepository<{{info.type_name}}, {{domain.type_name}}, {{domain.type_key}}>, I{{domain.type_name}}Repository
+public class {{type.name}}Repository : MongoDbRepository<{{db_context_type.name}}, {{type.name}}, {{type.key}}>, I{{type.name}}Repository
 {
-    public {{domain.type_name}}Repository(IMongoDbContextProvider<{{info.type_name}}> dbContextProvider) : base(dbContextProvider)
+    public {{type.name}}Repository(IMongoDbContextProvider<{{db_context_type.name}}> dbContextProvider) : base(dbContextProvider)
     {
     }
 
-    // public virtual async Task<{{domain.type_name}}> FindByNameAsync(string name, CancellationToken cancellationToken = default)
+    // public virtual async Task<{{type.name}}?> FindByNameAsync(string name, CancellationToken cancellationToken = default)
     // {
     //     var query = await GetMongoQueryableAsync();
-    // 
+    //
     //     return await query.FirstOrDefaultAsync(x => x.Name == name, cancellationToken: cancellationToken);
     // }
-    
-    // public virtual async Task<{{domain.type_name}}> GetByNameAsync(string name, CancellationToken cancellationToken = default)
+
+    // public virtual async Task<{{type.name}}> GetByNameAsync(string name, CancellationToken cancellationToken = default)
     // {
     //     var query = await GetMongoQueryableAsync();
-    // 
+    //
     //     var entity = await query.FirstOrDefaultAsync(x => x.Name == name, cancellationToken: cancellationToken);
-    // 
-    //     return entity ?? throw new EntityNotFoundException(typeof({{domain.type_name}}));
+    //
+    //     return entity ?? throw new EntityNotFoundException(typeof({{type.name}}));
     // }
 
-    
+
     // public virtual async Task<bool> IsNameExistsAsync(string name, Guid[] excludeIds = null, CancellationToken cancellationToken = default)
     // {
     //     var query = await GetMongoQueryableAsync();
-    // 
+    //
     //     return await query
     //         .WhereIf(excludeIds?.Any() == true, x => !excludeIds.Contains(x.Id))
-    //         .As<IMongoQueryable<{{domain.type_name}}>>()
+    //         .As<IMongoQueryable<{{type.name}}>>()
     //         .AnyAsync(x => x.Name == name, cancellationToken: cancellationToken);
     // }
 
@@ -53,11 +54,11 @@ public class {{domain.type_name}}Repository : MongoDbRepository<{{info.type_name
         return await query
             // TODO
             //.WhereIf(!string.IsNullOrEmpty(filter), x => x.Name.Contains(filter))
-            .As<IMongoQueryable<{{domain.type_name}}>>()
+            .As<IMongoQueryable<{{type.name}}>>()
             .LongCountAsync(cancellationToken);
     }
 
-    public virtual async Task<List<{{domain.type_name}}>> GetListAsync(string? filter = null, bool includeDetails = false, CancellationToken cancellationToken = default)
+    public virtual async Task<List<{{type.name}}>> GetListAsync(string? filter = null, bool includeDetails = false, CancellationToken cancellationToken = default)
     {
         var query = await GetMongoQueryableAsync();
 
@@ -65,11 +66,11 @@ public class {{domain.type_name}}Repository : MongoDbRepository<{{info.type_name
             // TODO
             //.IncludeIf(includeDetails, TODO )
             //.WhereIf(!string.IsNullOrEmpty(filter), x => x.Name.Contains(filter))
-            .As<IMongoQueryable<{{domain.type_name}}>>()
+            .As<IMongoQueryable<{{type.name}}>>()
             .ToListAsync(cancellationToken);
     }
 
-    public virtual async Task<List<{{domain.type_name}}>> GetPagedListAsync(int skipCount, int maxResultCount, string? filter = null, string? sorting = null, bool includeDetails = false, CancellationToken cancellationToken = default)
+    public virtual async Task<List<{{type.name}}>> GetPagedListAsync(int skipCount, int maxResultCount, string? filter = null, string? sorting = null, bool includeDetails = false, CancellationToken cancellationToken = default)
     {
         var query = await GetMongoQueryableAsync();
 
@@ -77,9 +78,9 @@ public class {{domain.type_name}}Repository : MongoDbRepository<{{info.type_name
             // TODO
             //.IncludeIf(includeDetails, TODO )
             //.WhereIf(!string.IsNullOrEmpty(filter), x => x.Name.Contains(filter))
-            .OrderBy(sorting ?? nameof({{domain.type_name}}.CreationTime) + " desc")
+            .OrderBy(sorting ?? nameof({{type.name}}.CreationTime) + " desc")
             .PageBy(skipCount, maxResultCount)
-            .As<IMongoQueryable<{{domain.type_name}}>>()
+            .As<IMongoQueryable<{{type.name}}>>()
             .ToListAsync(cancellationToken);
     }
 }

@@ -4,17 +4,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using Volo.Abp.Domain.Repositories;
 
-namespace {{type_namespace}};
+namespace {{type.namespace}};
 
-public interface I{{type_name}}Repository : IRepository<{{type_name}}, {{type_key}}>
+public interface I{{type.name}}Repository : I{{readonly_repo?"ReadOnly":""}}Repository<{{type.name}}, {{type.key}}>
 {
-    // Task<bool> IsNameExistsAsync(string name, Guid[] excludeIds = null, CancellationToken cancellationToken = default);
-    // Task<{{type_name}}> GetByNameAsync(string name, CancellationToken cancellationToken = default);
-    // Task<{{type_name}}?> FindByNameAsync(string name, CancellationToken cancellationToken = default);
+    // Task<bool> IsNameExistsAsync(string name, {{type.key}}[] excludeIds = null, CancellationToken cancellationToken = default);
+    // Task<{{type.name}}> GetByNameAsync(string name, CancellationToken cancellationToken = default);
+    // Task<{{type.name}}?> FindByNameAsync(string name, CancellationToken cancellationToken = default);
 
     Task<long> GetCountAsync(string? filter = null, CancellationToken cancellationToken = default);
-
-    Task<List<{{type_name}}>> GetListAsync(string? filter = null, bool includeDetails = false, CancellationToken cancellationToken = default);
-
-    Task<List<{{type_name}}>> GetPagedListAsync(int skipCount, int maxResultCount, string? filter = null, string? sorting = null, bool includeDetails = false, CancellationToken cancellationToken = default);
+    Task<List<{{type.name}}>> GetListAsync(string? filter = null, bool includeDetails = false, CancellationToken cancellationToken = default);
+    Task<List<{{type.name}}>> GetPagedListAsync(int skipCount, int maxResultCount, string? filter = null, string? sorting = null, bool includeDetails = false, CancellationToken cancellationToken = default);
 }
