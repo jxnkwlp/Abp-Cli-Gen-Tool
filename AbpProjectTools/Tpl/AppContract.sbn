@@ -1,0 +1,51 @@
+﻿using System;
+using System.Threading.Tasks;
+using Volo.Abp.Application.Dtos;
+using Volo.Abp.Application.Services;
+
+namespace {{type.namespace}};
+
+/// <summary>
+///  Application service contract for {{type.name}}
+/// </summary>
+{{~if crud && list_result_type_name~}}
+public interface I{{type.name}}AppService : ICrudAppService<{{type.name}}Dto, {{list_result_type_name}}, {{type.key}}, {{list_request_type_name}}, {{create_type_name}}, {{update_type_name}}>
+{{~else if crud~}}
+public interface I{{type.name}}AppService : ICrudAppService<{{type.name}}Dto, {{type.key}}, {{list_request_type_name}}, {{create_type_name}}, {{update_type_name}}>
+{{~else~}}
+public interface I{{type.name}}AppService : IApplicationService
+{{~end~}}
+{
+{{~if !empty && !crud ~}}
+    /// <summary>
+    ///  Get {{type.name}} list by paged params
+    /// </summary>
+    /// <param name="input"></param>
+    Task<PagedResultDto<{{list_result_type_name}}>> GetListAsync({{list_request_type_name}} input);
+
+    /// <summary>
+    ///  Get an {{type.name}}
+    /// </summary>
+    /// <param name="id"></param>
+    Task<{{type.name}}Dto> GetAsync({{type.key}} id);
+
+    /// <summary>
+    ///  Create {{type.name}}
+    /// </summary>
+    /// <param name="input"></param>
+    Task<{{type.name}}Dto> CreateAsync({{create_type_name}} input);
+
+    /// <summary>
+    ///  Update {{type.name}} by id
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="input"></param>
+    Task<{{type.name}}Dto> UpdateAsync({{type.key}} id, {{update_type_name}} input);
+
+    /// <summary>
+    ///  Delete {{type.name}} by id
+    /// </summary>
+    /// <param name="id"></param>
+    Task DeleteAsync({{type.key}} id);
+{{~end~}}
+}

@@ -1,25 +1,19 @@
-﻿using System.CommandLine;
+﻿using AbpProjectTools.Commands.Backends;
+using System.CommandLine;
 
 namespace AbpProjectTools.Commands;
 
-public class CodeGeneratorCommand : CommandBase
+public class CodeGeneratorCommand : ICmdCommand
 {
-    public CodeGeneratorCommand()
+    public Command GetCommand()
     {
-    }
+        var command = new Command("code", "Code generate");
 
-    public override Command GetCommand()
-    {
-        var command = new Command("generate", "Code generate");
-        command.AddAlias("gen");
-
-        // backend
-        command.AddCommand(new BackendCodeGeneratorCommand().GetCommand());
-
-        // fontend 
-        command.AddCommand(new FontendCodeGeneratorCommand().GetCommand());
+        command.AddCommand(new DomainServiceGeneratorCommand().GetCommand());
+        command.AddCommand(new RepositoryGeneratorCommand().GetCommand());
+        command.AddCommand(new AppServiceGeneratorCommand().GetCommand());
+        command.AddCommand(new HttpApiGeneratorCommand().GetCommand());
 
         return command;
     }
-
 }

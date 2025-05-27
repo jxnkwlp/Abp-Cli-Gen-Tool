@@ -6,18 +6,18 @@ using Volo.Abp;
 using Volo.Abp.Domain.Services;
 using Volo.Abp.Uow;
 
-namespace {{type_namespace}};
+namespace {{type.namespace}};
 
-public interface I{{type_name}}Manager : IDomainService
+public interface I{{type.name}}Manager : IDomainService
 {
 }
 
-public class {{type_name}}Manager : DomainService, I{{type_name}}Manager
+public class {{type.name}}Manager : DomainService, I{{type.name}}Manager
 {
-    private readonly I{{type_name}}Repository _{{type_name | camel_case}}Repository;
+    private readonly I{{type.name}}Repository _{{type.name | camel_case}}Repository;
 
-    public {{type_name}}Manager(I{{type_name}}Repository {{type_name | camel_case}}Repository)
+    public {{type.name}}Manager(I{{type.name}}Repository {{type.name | camel_case}}Repository)
     {
-        _{{type_name | camel_case}}Repository = {{type_name | camel_case}}Repository;
+        _{{type.name | camel_case}}Repository = {{type.name | camel_case}}Repository;
     }
 }

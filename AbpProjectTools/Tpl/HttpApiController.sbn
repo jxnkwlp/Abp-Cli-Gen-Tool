@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
 using Volo.Abp;
 using Volo.Abp.Content;
@@ -10,37 +11,34 @@ using Volo.Abp.Application.Dtos;
 using {{item}};
 {{~end~}}
 
-namespace {{app_service.namespace}};
+namespace {{type.namespace}};
 
-[Area({{project_name}}RemoteServiceConsts.RemoteServiceName)]
-[RemoteService(Name = {{project_name}}RemoteServiceConsts.RemoteServiceName)]
-[Route("api/{{app_service.name | to_slug_string | to_pluralize }}")]
-public class {{app_service.name}}Controller : {{base_controller}}, I{{app_service.name}}AppService
+/// <inheritdoc/>
+[Area({{slu_name}}RemoteServiceConsts.RemoteServiceName)]
+[RemoteService(Name = {{slu_name}}RemoteServiceConsts.RemoteServiceName)]
+[ControllerName("{{name}}")]
+[Route("api/{{name | to_slug_string | to_pluralize }}")]
+public class {{name}}Controller : {{base_controller_name}}, {{type.name}}
 {
-    protected I{{app_service.name}}AppService Service {get;}
+    protected {{type.name}} Service { get; }
 
-    public {{app_service.name}}Controller(I{{app_service.name}}AppService service)
+    public {{name}}Controller({{type.name}} service)
     {
         Service = service;
     }
 
-{{~for item in app_service.methods~}}
-{{~if !item.is_inherited~}}
+{{~for item in type.methods ~}}
+{{~if !item.is_inherite ~}}
     /// <inheritdoc/>
-    [{{routes[item.name].method}}({{routes[item.name].url ? "\""+routes[item.name].url+"\"" : "" }})]
-    public virtual {{item.type}} {{~item.type_arguments.size>0?"<":"" ~}}
-{{-for p in item.type_arguments-}}
-            {{p.name}}{{for.last ? "":","}}
-{{-end-}}
-{{- item.type_arguments.size > 0 ? "> ":" " -}}
-        {{-item.name}}(
-    {{-for p in item.params-}}
-            {{p.type}} {{p.name}}{{for.last?"":", "}}
+    [{{routes[item.name].method}}({{routes[item.name].path?"\""+routes[item.name].path+"\"":null}})]
+    public virtual {{item.return_type_code}} {{item.name}}(
+    {{-for p in item.members-}}
+            {{p.type_code}} {{p.name}}{{for.last?"":", "}}
     {{-end-}}
     )
     {
         return Service.{{item.name}}(
-            {{-for p in item.params-}}
+            {{-for p in item.members-}}
                 {{p.name}}{{for.last?"":", "}}
             {{-end-}}
         );
